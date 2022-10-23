@@ -37,4 +37,13 @@ export const URL_LIST = {
     DeleteFeed: 'api/v1/delete-feed',
     UpdateFeedStatus: 'api/v1/update-feed-status',
   },
+
+  Events: {
+    GetRules: 'api/v1/get-event-rules',
+    GetEvents: 'api/v1/get-events',
+    UploadEventBanner: 'api/v1/upload-event-banner',
+    CreateEvent: 'api/v1/create-event',
+    UpdateEvent: 'api/v1/update-event',
+    DeleteEvents: 'api/v1/delete-events',
+  },
 };

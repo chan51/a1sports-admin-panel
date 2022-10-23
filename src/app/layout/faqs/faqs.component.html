@@ -1,0 +1,228 @@
+<div class="spinner" *ngIf="loader">
+  <div class="innerDiv">
+    <div class="bounce1"></div>
+    <div class="bounce2"></div>
+    <div class="bounce3"></div>
+  </div>
+</div>
+
+<div [@routerTransition]>
+  <app-page-header [heading]="'FAQs'" [icon]="'fa-question-o'"></app-page-header>
+  <div class="row">
+    <div class="col col-xl-12 col-lg-12">
+      <div class="filters">
+        <input type="text" class="search-box" placeholder="Type to filter faqs..." (keyup)="updateFilter($event)" />
+        <div *ngIf="!showAll" class="refreshIcon btn" (click)="getList()" placement="top" ngbTooltip="Refresh">
+          Refresh
+        </div>
+        <a *ngIf="showAll" routerLink="/faqs" class="refreshIcon btn">All FAQs</a>
+        <div class="addIcon">
+          <a class="btn" (click)="onAction('add', -1, FAQModal, 'add')">
+            Add FAQ <i class="fa fa-plus-circle ml-1" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="customTable">
+        <ngx-datatable
+          [rows]="FAQs"
+          [columns]="columns"
+          [columnMode]="'force'"
+          #table
+          class="material"
+          [loadingIndicator]="loadingIndicator"
+          [headerHeight]="50"
+          [footerHeight]="50"
+          [rowHeight]="'auto'"
+          [limit]="limitData"
+          [externalSorting]="true"
+          [count]="totalFAQs"
+          [offset]="pageNumber"
+          (sort)="onSort($event)"
+          (page)="setPage($event)"
+          [selected]="selectedRows"
+          [selectionType]="'checkbox'"
+          [selectAllRowsOnPage]="true"
+          [displayCheck]="shouldCheck"
+          [selectCheck]="shouldCheck"
+          (select)="onSelect($event)"
+        >
+          <!-- Row Detail Template -->
+          <ngx-datatable-row-detail [rowHeight]="'auto'" #myDetailRow>
+            <ng-template let-row="row" let-expanded="expanded" ngx-datatable-row-detail-template>
+              <div class="row details">
+                <div class="col col-xl-8 col-md-8 col-lg-8">
+                  <div>
+                    <div><strong>Question</strong></div>
+                    <div>{{ selectedRow.title }}</div>
+                  </div>
+                </div>
+
+                <div class="col col-xl-12 col-md-12 col-lg-12">
+                  <div>
+                    <div><strong>Answer</strong></div>
+                    <div>{{ selectedRow.desc }}</div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-row-detail>
+
+          <!-- Column Templates -->
+          <ngx-datatable-column
+            [width]="30"
+            [sortable]="false"
+            [canAutoResize]="false"
+            [draggable]="false"
+            [resizeable]="false"
+            [headerCheckboxable]="true"
+            [checkboxable]="true"
+          >
+          </ngx-datatable-column>
+          <ngx-datatable-column
+            [width]="50"
+            [resizeable]="false"
+            [sortable]="false"
+            [draggable]="false"
+            [canAutoResize]="false"
+          >
+            <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
+              <a
+                style="color: grey"
+                href="javascript:void(0)"
+                [class.datatable-icon-right]="!expanded"
+                [class.datatable-icon-down]="expanded"
+                title="Expand/Collapse Row"
+                (click)="toggleExpandRow(row)"
+              >
+              </a>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="" [width]="80" [canAutoResize]="false">
+            <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-cell-template>
+              <strong>{{ skipData + rowIndex + 1 }}</strong>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Title">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              <span class="datatable-header-cell-wrapper ng-star-inserted"
+                ><span class="datatable-header-cell-label draggable">Question</span></span
+              >
+            </ng-template>
+            <ng-template let-value="value" ngx-datatable-cell-template>
+              <strong>{{ value }}</strong>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Description">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              <span class="datatable-header-cell-wrapper ng-star-inserted"
+                ><span class="datatable-header-cell-label draggable">Answer</span></span
+              >
+            </ng-template>
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <strong>{{ row?.desc.substring(0, 40) }}{{ row?.desc.length > 40 ? '...' : '' }}</strong>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Action" [width]="120" [canAutoResize]="false">
+            <ng-template let-value="value" ngx-datatable-cell-template let-rowIndex="rowIndex">
+              <a class="actionButton" placement="bottom" ngbTooltip="Edit">
+                <i class="fa fa-fw fa-edit" (click)="onAction('edit', rowIndex, FAQModal, 'edit')"></i>
+              </a>
+              <a class="actionButton" placement="bottom" ngbTooltip="Delete">
+                <i class="fa fa-fw fa-trash" (click)="onAction('delete', rowIndex, deleteModal, 'delete')"></i>
+              </a>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-footer>
+            <ng-template
+              ngx-datatable-footer-template
+              let-rowCount="rowCount"
+              let-pageSize="pageSize"
+              let-selectedCount="selectedCount"
+              let-curPage="curPage"
+              let-offset="offset"
+            >
+              <div class="footer" style="padding: 5px 10px; width: 100%">
+                <div>{{ selectedRows?.length }} selected / {{ totalFAQs }} total</div>
+                <div>
+                  <a
+                    *ngFor="let data of arrayFromLength(totalFAQs); let idx = index"
+                    (click)="setPage({ offset: idx })"
+                  >
+                    {{ idx }}
+                  </a>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-footer>
+        </ngx-datatable>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #FAQModal let-c="close" let-d="dismiss">
+  <div class="spinner" *ngIf="modalLoader">
+    <div class="innerDiv">
+      <div class="bounce1"></div>
+      <div class="bounce2"></div>
+      <div class="bounce3"></div>
+    </div>
+  </div>
+  <div class="modal-header showError">
+    <h5 class="modal-title">
+      {{ selected?.action }} <strong *ngIf="selected?.action == 'edit'">{{ selected?.name }}</strong>
+    </h5>
+    <ngb-alert *ngIf="errorMessage" type="danger" (close)="errorMessage = null">{{ errorMessage }}</ngb-alert>
+    <button type="button" class="close" aria-label="Close" (click)="d()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form role="form" *ngIf="selected">
+      <div class="row">
+        <div class="col col-xl-8 col-md-8 col-lg-8">
+          <fieldset class="form-group">
+            <label>*Question</label>
+            <input class="form-control" name="title" [(ngModel)]="selected.title" />
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col col-xl-12 col-md-12 col-lg-12">
+          <fieldset class="form-group">
+            <label>*Answer</label>
+            <textarea class="form-control" name="description" [(ngModel)]="selected.desc"></textarea>
+          </fieldset>
+        </div>
+      </div>
+
+      <span class="error">*required fields</span>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" (click)="c()">Cancel</button>
+    <button type="button" class="btn btn-secondary" (click)="formSubmit(c)">Submit</button>
+  </div>
+</ng-template>
+
+<ng-template #deleteModal let-c="close" let-d="dismiss" backdrop="false">
+  <div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLabel">
+      Do you really want to delete <strong>{{ selected?.title }}</strong
+      >?
+    </h5>
+    <button type="button" class="close" aria-label="Close" (click)="d()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body" *ngIf="successMessage">
+    <ngb-alert type="danger" (close)="successMessage = null">{{ successMessage }}</ngb-alert>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="c()">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="onDelete(c)">Yes</button>
+  </div>
+</ng-template>

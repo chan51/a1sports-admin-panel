@@ -1,0 +1,32 @@
+<div class="spinner" *ngIf="loader">
+    <div class="innerDiv">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+    </div>
+</div>
+<div class="login-page" [@routerTransition]>
+    <div class="row justify-content-md-center">
+        <div class="col-md-4">
+            <img src="assets/images/logo.png" width="150px" class="user-avatar" />
+            <h1>Admin Login</h1>
+            <ngb-alert *ngIf="alert.label == 5" [type]="alert.type" (close)="alert.label = 0">{{ alert.message }}</ngb-alert>
+            <form role="form">
+                <div class="form-content">
+                    <div class="form-group has-success">
+                        <label class="form-control-label" for="loginName">Login Name</label>
+                        <input type="text" name="loginName" [(ngModel)]="loginForm.loginName" class="form-control input-underline input-lg" id="loginName">
+                        <ngb-alert *ngIf="alert.label == 1 || alert.label == 3" [type]="alert.type" (close)="alert.label = 0">{{ alert.message }}</ngb-alert>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-control-label" for="password">Password</label>
+                        <input type="password" name="password" [(ngModel)]="loginForm.password" class="form-control input-underline input-lg" id="password" (keyup.enter)="doLogin()">
+                        <ngb-alert *ngIf="alert.label == 2 || alert.label == 4" [type]="alert.type" (close)="alert.label = 0">{{ alert.message }}</ngb-alert>
+                    </div>
+                </div>
+                <a class="btn rounded-btn" (click)="doLogin()"> Log in </a>
+            </form>
+        </div>
+    </div>
+</div>

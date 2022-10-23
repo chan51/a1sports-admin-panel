@@ -1,0 +1,14 @@
+<nav class="sidebar" [ngClass]="{ sidebarPushRight: isActive }">
+  <div class="list-group">
+    <ng-template [ngIf]="menu.length" let-item ngFor [ngForOf]="menu">
+      <a
+        [routerLink]="item.link"
+        (click)="callbackFunc(item.callback)"
+        [routerLinkActive]="item.link ? ['router-link-active'] : ''"
+        class="list-group-item {{ item.class }}"
+      >
+        <i class="fa fa-fw {{ item.icon }}"></i>&nbsp; {{ item.title }}
+      </a>
+    </ng-template>
+  </div>
+</nav>

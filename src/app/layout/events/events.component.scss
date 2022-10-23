@@ -1,0 +1,127 @@
+.actionButton {
+  cursor: pointer;
+  padding-right: 10px;
+}
+
+::ng-deep {
+  ul.steps-indicator {
+    display: none;
+  }
+}
+
+element.style {
+}
+
+aw-wizard-step {
+  display: flex;
+  min-height: 10rem;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .prizeType {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    label {
+      margin-bottom: 0;
+      margin-right: 2rem;
+      font-weight: 500;
+    }
+
+    .prizeRadio {
+      display: flex;
+      align-items: center;
+
+      .radioInput {
+        margin-right: 1rem;
+      }
+    }
+  }
+}
+
+button.icon-btn {
+  background: none;
+  border: none;
+  box-shadow: none;
+
+  img {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+}
+
+.prizeListTable {
+  th {
+    padding: 5px 0.75rem;
+    font-size: 14px;
+    font-weight: 400;
+    background: #f1f1f1;
+    vertical-align: middle;
+
+    button {
+      height: auto;
+      font-size: 12px;
+      padding: 3px 8px;
+    }
+  }
+
+  td {
+    vertical-align: middle;
+  }
+
+  .index {
+    width: 3rem;
+  }
+
+  .action {
+    width: 6rem;
+    text-align: right;
+  }
+
+  .selectCoupon {
+    max-width: 9rem;
+  }
+
+  .multindex {
+    max-width: 9rem;
+  }
+
+  .multindex-data {
+    display: flex;
+    align-items: center;
+
+    select.form-control {
+      width: 3.4rem;
+      padding-left: 2px;
+      padding-right: 2px;
+    }
+
+    span {
+      margin-left: 1rem;
+      margin-right: 1rem;
+    }
+  }
+}
+
+.leader-section {
+  list-style: none;
+  margin-left: -30px;
+
+  .leader-item {
+    div {
+      margin: 20px;
+      display: inline-block;
+      color: #212529 !important;
+
+      &:nth-child(2) {
+        min-width: 200px;
+        width: 50%;
+      }
+    }
+    span {
+      padding-top: 10px;
+      color: #9b9999;
+    }
+  }
+}

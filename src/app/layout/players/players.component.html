@@ -1,0 +1,311 @@
+<div class="spinner" *ngIf="loader">
+  <div class="innerDiv">
+    <div class="bounce1"></div>
+    <div class="bounce2"></div>
+    <div class="bounce3"></div>
+  </div>
+</div>
+
+<div [@routerTransition]>
+  <app-page-header *ngIf="!hideSnackBar" [heading]="'All Players'" [icon]="'fa-user'"></app-page-header>
+  <div class="row">
+    <div class="col col-xl-12 col-lg-12">
+      <div class="filters">
+        <input type="text" class="search-box" placeholder="Type to filter players..." (keyup)="updateFilter($event)" />
+        <div *ngIf="!showAll" class="refreshIcon btn" (click)="getList()" placement="top" ngbTooltip="Refresh">
+          Refresh
+        </div>
+        <a *ngIf="showAll" routerLink="/players" class="user btn">All Players </a>
+        <div class="addIcon">
+          <a class="btn" (click)="onAction(-1, playerModal, 'add')">
+            Add Players <i class="fa fa-plus-circle" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="customTable">
+        <ngx-datatable
+          [rows]="players"
+          [columns]="columns"
+          [columnMode]="'force'"
+          #table
+          class="material expandable"
+          [loadingIndicator]="loadingIndicator"
+          [headerHeight]="50"
+          [footerHeight]="50"
+          [rowHeight]="'auto'"
+          [limit]="limitData"
+          [externalPaging]="true"
+          [externalSorting]="true"
+          [count]="totalPlayers"
+          [offset]="pageNumber"
+          (sort)="onSort($event)"
+          (page)="setPage($event)"
+          [selected]="selectedRows"
+          [selectionType]="'checkbox'"
+          [selectAllRowsOnPage]="true"
+          [displayCheck]="shouldCheck"
+          [selectCheck]="shouldCheck"
+          (select)="onSelect($event)"
+        >
+          <!-- Row Detail Template -->
+          <ngx-datatable-row-detail [rowHeight]="'auto'" #myDetailRow>
+            <ng-template let-row="row" let-expanded="expanded" ngx-datatable-row-detail-template>
+              <div class="row details">
+                <div class="col col-xl-4 col-md-4 col-lg-4" *ngIf="selectedRow.name">
+                  <div>
+                    <div><strong>Name</strong></div>
+                    <div>{{ selectedRow.name }}</div>
+                  </div>
+                </div>
+
+                <div class="col col-xl-4 col-md-4 col-lg-4" *ngIf="selectedRow.playerType">
+                  <div>
+                    <div><strong>Team</strong></div>
+                    <div>{{ selectedRow.team.toUpperCase() }}</div>
+                  </div>
+                </div>
+
+                <div class="col col-xl-4 col-md-4 col-lg-4">
+                  <div>
+                    <div><strong>Value</strong></div>
+                    <div>{{ selectedRow.value || 0 }}</div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-row-detail>
+
+          <!-- Column Templates -->
+          <ngx-datatable-column
+            [width]="30"
+            [sortable]="false"
+            [canAutoResize]="false"
+            [draggable]="false"
+            [resizeable]="false"
+            [headerCheckboxable]="true"
+            [checkboxable]="true"
+          >
+          </ngx-datatable-column>
+          <ngx-datatable-column
+            [width]="50"
+            [resizeable]="false"
+            [sortable]="false"
+            [draggable]="false"
+            [canAutoResize]="false"
+          >
+            <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
+              <a
+                style="color: grey"
+                href="javascript:void(0)"
+                [class.datatable-icon-right]="!expanded"
+                [class.datatable-icon-down]="expanded"
+                title="Expand/Collapse Row"
+                (click)="toggleExpandRow(row)"
+              >
+              </a>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="" [width]="120" [canAutoResize]="false">
+            <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-cell-template>
+              <strong>{{ skipData + rowIndex + 1 }}</strong>
+              <div class="image-element">
+                <img
+                  class="profile-avatar"
+                  [src]="row?.profile ? row?.profile : 'assets/images/avatar.png'"
+                  (error)="this.src = 'assets/images/avatar.png'"
+                  (click)="openImageModal(imageModal, row?.profile)"
+                />
+                <span [ngClass]="{ chatCount: row.noteCount }"></span>
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Name">
+            <ng-template let-value="value" let-row="row" ngx-datatable-cell-template>
+              <strong>{{ value }}</strong>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Team">
+            <ng-template let-value="value" ngx-datatable-cell-template>
+              <strong>{{ value }}</strong>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Coin" [width]="40">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <strong>{{ row.value || 0 }}</strong>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Action" [width]="350" [canAutoResize]="false">
+            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template let-rowIndex="rowIndex">
+              <div class="grid-option-buttons">
+                <button class="btn approve" (click)="onAction(rowIndex, playerModal, 'edit')">Edit</button>
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-footer>
+            <ng-template
+              ngx-datatable-footer-template
+              let-rowCount="rowCount"
+              let-pageSize="pageSize"
+              let-selectedCount="selectedCount"
+              let-curPage="curPage"
+              let-offset="offset"
+            >
+              <div class="footer" style="padding: 5px 10px; width: 100%">
+                <div>{{ selectedRows?.length }} selected / {{ totalPlayers }} total</div>
+                <div>
+                  <a
+                    *ngFor="let data of arrayFromLength(totalPlayers); let idx = index"
+                    (click)="setPage({ offset: idx })"
+                  >
+                    {{ idx }}
+                  </a>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-footer>
+        </ngx-datatable>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #playerModal let-c="close" let-d="dismiss">
+  <div class="spinner" *ngIf="modalLoader">
+    <div class="innerDiv">
+      <div class="bounce1"></div>
+      <div class="bounce2"></div>
+      <div class="bounce3"></div>
+    </div>
+  </div>
+  <div class="modal-header showError">
+    <h5 class="modal-title">
+      {{ selected?.action }} <strong *ngIf="selected?.action == 'edit'">{{ selected?.title }}</strong>
+    </h5>
+    <ngb-alert *ngIf="errorMessage" type="danger" (close)="errorMessage = null">{{ errorMessage }}</ngb-alert>
+    <button type="button" class="close" aria-label="Close" (click)="d()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body user-form">
+    <form role="form" autocomplete="off" [formGroup]="playerForm">
+      <div class="row">
+        <div class="col col-xl-6 col-md-6 col-lg-6">
+          <fieldset class="form-group">
+            <label>Name</label>
+            <input class="form-control" autocomplete="off" name="name" formControlName="name" />
+          </fieldset>
+        </div>
+        <div class="col col-xl-6 col-md-6 col-lg-6">
+          <fieldset class="form-group">
+            <label>Team</label>
+            <select name="team" formControlName="team" class="form-control">
+              <option *ngFor="let team of dropdownList.teams" [value]="team.id">{{ team.value }}</option>
+            </select>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col col-xl-6 col-md-6 col-lg-6">
+          <fieldset class="form-group">
+            <label>Role</label>
+            <select name="role" formControlName="role" class="form-control">
+              <option *ngFor="let role of dropdownList.roles" [value]="role.id">{{ role.value }}</option>
+            </select>
+          </fieldset>
+        </div>
+
+        <div class="col col-xl-6 col-md-6 col-lg-6">
+          <fieldset class="form-group">
+            <label>Value</label>
+            <input class="form-control" autocomplete="off" name="value" formControlName="value" />
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="row" *ngIf="false">
+        <div class="col col-xl-6 col-md-6 col-lg-6">
+          <fieldset class="form-group">
+            <label>Profile Picture</label>
+            <div class="file-upload">
+              <div class="image-upload-wrap" *ngIf="!selected?.pictures?.profile">
+                <input
+                  class="file-upload-input"
+                  type="file"
+                  (change)="handleInputChange($event, 'profile')"
+                  accept="image/*"
+                />
+                <div class="drag-text">
+                  <span>Drag and drop a file or select add Image</span>
+                </div>
+              </div>
+              <div class="file-upload-content" *ngIf="selected?.pictures?.profile">
+                <img
+                  class="file-upload-image"
+                  [src]="f.profile.value ? imagePath + f.profile.value : selected?.pictures.profile"
+                  alt="your image"
+                />
+                <div class="image-title-wrap">
+                  <button type="button" (click)="selected?.pictures.profile = ''" class="remove-image">
+                    Remove Image
+                  </button>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" (click)="c()">Cancel</button>
+    <button type="button" class="btn btn-secondary" (click)="formSubmit(c)">Submit</button>
+  </div>
+</ng-template>
+
+<ng-template #deleteModal let-c="close" let-d="dismiss" backdrop="false">
+  <div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLabel">
+      Do you really want to delete <strong>{{ selected?.title }}</strong
+      >?
+    </h5>
+    <button type="button" class="close" aria-label="Close" (click)="d()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="c()">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="onDelete(c)">Yes</button>
+  </div>
+</ng-template>
+
+<ng-template #imageModal let-c="close" let-d="dismiss">
+  <div class="modal-body image-modal">
+    <button type="button" class="close" aria-label="Close" (click)="d()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <img
+      style="width: 100%"
+      [src]="selectedImage ? imagePath + selectedImage : 'assets/images/nofile.png'"
+      onerror="this.src='assets/images/nofile.png'"
+    />
+  </div>
+</ng-template>
+
+<ng-template #approveModal let-c="close" let-d="dismiss" backdrop="false">
+  <div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLabel">
+      Update player status to {{ approvePlayerData?.status ? 'Approve' : 'Disable' }}
+    </h5>
+    <button type="button" class="close" aria-label="Close" (click)="d()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="c()">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="onApprove(c)">Yes</button>
+  </div>
+</ng-template>

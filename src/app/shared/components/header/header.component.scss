@@ -1,0 +1,23 @@
+$themeColorLight:#3185fc;
+$themeColorDark:#3185fc;
+$themeColorPink:rgb(255,0,75);
+$topnav-background-color: linear-gradient(15deg, $themeColorLight 0%, $themeColorDark 100%);
+:host {
+    .navbar {
+        background: $topnav-background-color;
+        .navbar-brand {
+            color: #fff;
+        }
+        .nav-link,
+        .navbar-toggler {
+            cursor: pointer;
+        }
+        .logoutButton {
+            position: absolute;
+            color: #fafafa;
+            right: 15px;
+            cursor: pointer;
+        }
+    }
+
+}

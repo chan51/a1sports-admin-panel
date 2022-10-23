@@ -1,0 +1,509 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import 'bootstrap/bootstrap';
+@import 'spinner';
+@import 'utils';
+@import 'rtl';
+@import 'responsive';
+/* @import '~@swimlane/ngx-datatable/release/index.css';
+@import '~@swimlane/ngx-datatable/release/themes/material.css';
+@import '~@swimlane/ngx-datatable/release/assets/icons.css'; */
+
+$themeColorGrey: #3185fc; 
+$themeColorGreen: #4b96ff;
+$themeColorLight: rgb(244, 245, 248); // #f4f5f8
+$themeColorLightGreen: #b7d3fb; // #4dff34
+
+* {
+  outline: none !important;
+}
+
+a,
+a:hover {
+  color: $themeColorGreen;
+}
+
+input::placeholder {
+  font-size: 14px;
+  color: #c5c5c5;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.btn-default {
+  color: $themeColorLight;
+  background-color: $themeColorGrey;
+}
+
+.btn-primary,
+.btn-secondary {
+  background-color: $themeColorGreen !important;
+  border-color: transparent !important;
+}
+
+.btn-group label.focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 102, 0, 0.5) !important;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.round {
+  cursor: pointer;
+  position: relative;
+  margin-top: 10px;
+  padding-left: 10px;
+}
+
+.round label {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  height: 22px;
+  width: 22px;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.round label:after {
+  border: 2px solid #fff;
+  border-top: none;
+  border-right: none;
+  content: '';
+  height: 6px;
+  left: 4px;
+  opacity: 0;
+  position: absolute;
+  top: 6px;
+  transform: rotate(-45deg);
+  width: 12px;
+}
+
+.round input[type='checkbox'] {
+  margin-right: 10px;
+  visibility: hidden;
+}
+
+.round input[type='checkbox']:checked + label {
+  background-color: $themeColorGreen;
+  border-color: $themeColorGreen;
+}
+
+.round input[type='checkbox']:checked + label:after {
+  opacity: 1;
+}
+
+.radio-container {
+  display: block;
+  .radio {
+    margin: 0.5rem;
+    display: inline-block;
+
+    input[type='radio'] {
+      position: absolute;
+      opacity: 0;
+
+      + .radio-label {
+        &:before {
+          content: '';
+          background: #fff;
+          border-radius: 100%;
+          border: 1px solid darken($themeColorGrey, 25%);
+          display: inline-block;
+          width: 1.4em;
+          height: 1.4em;
+          position: relative;
+          margin-right: 0.3em;
+          vertical-align: top;
+          cursor: pointer;
+          text-align: center;
+          transition: all 250ms ease;
+        }
+      }
+
+      &:checked {
+        + .radio-label {
+          &:before {
+            background-color: $themeColorGreen;
+            box-shadow: inset 0 0 0 4px #fff;
+          }
+        }
+      }
+
+      &:focus {
+        + .radio-label {
+          &:before {
+            outline: none;
+            border-color: $themeColorGrey;
+          }
+        }
+      }
+
+      + .radio-label {
+        &:empty {
+          &:before {
+            margin-right: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+.refreshIcon {
+  // display: inline-block;
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  cursor: pointer;
+  color: $themeColorLight;
+}
+
+.bidRefresh {
+  text-align: right;
+  padding-bottom: 10px;
+
+  i {
+    cursor: pointer;
+  }
+}
+
+.addIcon {
+  // display: inline-block;
+  position: absolute;
+  top: 15px;
+  left: 30px;
+  cursor: pointer;
+  color: $themeColorLight;
+  font-size: 22px;
+  .btn {
+    i {
+      padding-left: 10px;
+    }
+  }
+}
+
+.Active,
+.Approve {
+  color: #1e7e34;
+}
+
+.Pending {
+  color: #d39e00;
+}
+
+.Inactive {
+  color: #bd2130;
+}
+
+.SelfPurchased {
+  color: #0f1ba3;
+}
+
+.Awarded {
+  color: $themeColorGreen;
+}
+
+.datatable-header-cell-label {
+  font-size: 14px;
+}
+
+.carFormModal {
+  overflow-y: hidden;
+}
+
+.modal-title {
+  text-transform: capitalize;
+}
+
+.modal {
+  fieldset label:first-child {
+    font-weight: normal;
+    font-size: 14px;
+  }
+}
+
+ngb-tabset {
+  .tab-content {
+    padding-top: 16px;
+  }
+}
+
+.showError .alert {
+  padding: 5px 25px 5px 5px !important;
+  margin-left: 20px !important;
+  margin-bottom: 0px !important;
+
+  .close {
+    padding-top: 20px !important;
+    padding-right: 20px !important;
+  }
+}
+
+.carStatus .form-group {
+  margin-bottom: 0px !important;
+}
+
+.btn-secondary {
+  background-color: #111541;
+}
+
+.error {
+  font-size: 12px;
+  color: #b02818;
+}
+
+.timeGroup input {
+  padding: 0.375rem 0.45rem;
+}
+
+.datatable-row-detail {
+  padding-top: 0px !important;
+
+  .row.details {
+    padding-left: 35px;
+    margin-right: 0px;
+
+    .col {
+      padding-bottom: 25px;
+    }
+  }
+
+  .row.details .col:first-child,
+  .padding-top-25 {
+    padding-top: 25px;
+  }
+
+  .row.details .col div div:last-child {
+    padding-top: 10px;
+    color: #9b9999;
+  }
+}
+
+.ng-trigger-routerTransition {
+  padding: 0px 20px;
+}
+
+.ngx-datatable.material {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 3px 5px 15px -5px rgba(0, 0, 0, 0.3);
+}
+
+.ngx-datatable.material.single-selection .datatable-body-row.active,
+.ngx-datatable.material.single-selection .datatable-body-row.active .datatable-row-group,
+.ngx-datatable.material.multi-selection .datatable-body-row.active,
+.ngx-datatable.material.multi-selection .datatable-body-row.active .datatable-row-group,
+.ngx-datatable.material.multi-click-selection .datatable-body-row.active,
+.ngx-datatable.material.multi-click-selection .datatable-body-row.active .datatable-row-group {
+  background-color: #878eb1 !important;
+}
+
+.ngx-datatable.material .empty-row {
+  padding: 0.5rem 4.3rem 1.2rem;
+}
+
+.ngx-datatable.material .datatable-header,
+.ngx-datatable.material .datatable-footer {
+  border-top: 1px solid rgb(234, 234, 234);
+}
+
+a.datatable-icon-right:before {
+  border: 1px solid grey;
+  border-radius: 50%;
+}
+
+datatable-body-row.active a.datatable-icon-right:before {
+  color: $themeColorGreen;
+  border: 1px solid $themeColorGreen;
+  border-radius: 50%;
+}
+
+.userBidTable {
+  .ngx-datatable .datatable-row-center {
+    width: 100%;
+  }
+
+  .ngx-datatable.fixed-header .datatable-header .datatable-header-inner .datatable-header-cell {
+    width: 100%;
+  }
+
+  .ngx-datatable .datatable-body .datatable-scroll {
+    width: 100%;
+  }
+
+  .ngx-datatable.material .datatable-body .datatable-body-row .datatable-body-cell {
+    width: 100%;
+  }
+}
+
+.search-box {
+  padding: 8px;
+  margin: 15px auto;
+  width: 40%;
+  border: 1px solid #d8d8d8;
+}
+
+.filter-box {
+  padding: 8px;
+  margin: 15px;
+  width: 17%;
+  border: 1px solid #d8d8d8;
+}
+
+.file-upload {
+  background-color: #ffffff;
+  width: 320px;
+  margin: 0 25px;
+
+  .file-upload-btn {
+    width: 100%;
+    margin: 0;
+    color: #fff;
+    background: #1fb264;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    border-bottom: 4px solid #15824b;
+    transition: all 0.2s ease;
+    outline: none;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .file-upload-btn:hover {
+    background: #e5e5e5;
+    color: #ffffff;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .file-upload-btn:active {
+    border: 0;
+    transition: all 0.2s ease;
+  }
+
+  .file-upload-content {
+    text-align: center;
+  }
+
+  .file-upload-input {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    outline: none;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .image-upload-wrap {
+    height: 160px;
+    margin-top: 10px;
+    border: 1px dashed $themeColorGreen;
+    position: relative;
+  }
+
+  .image-dropping,
+  .image-upload-wrap:hover {
+    background-color: #e5e5e5;
+    border: 1px dashed #e5e5e5;
+  }
+
+  .image-title-wrap {
+    padding: 50px 15px 0px 15px;
+    color: #222;
+  }
+
+  .drag-text {
+    text-align: center;
+    padding-top: 60px;
+  }
+
+  .drag-text span {
+    font-size: 14px;
+    color: $themeColorGreen;
+  }
+
+  .file-upload-image {
+    max-height: 200px;
+    max-width: 200px;
+    margin: auto;
+  }
+
+  .remove-image {
+    width: 200px;
+    margin: 0;
+    color: #b02818;
+    background: transparent;
+    border: none;
+    padding: 10px;
+    outline: none;
+    font-size: 14px;
+  }
+
+  .remove-image:hover {
+    background: transparent;
+    color: #b02818;
+    cursor: pointer;
+  }
+
+  .remove-image:active {
+    border: 0;
+    transition: all 0.2s ease;
+  }
+}
+
+.imagesBox {
+  width: 100%;
+  display: inline-block;
+
+  .imgThumb {
+    width: 120px;
+    height: 120px;
+    display: inline-flex;
+    background: #fff;
+    border: 1px solid #e1e1e1;
+    border-radius: 3px;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.06);
+    margin: 10px;
+    padding: 6px;
+    position: relative;
+    float: left;
+    cursor: pointer;
+
+    img,
+    video {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+.video-modal {
+  .modal-content {
+    padding: 0;
+
+    .modal-body {
+      padding: 0;
+
+      button {
+        position: absolute;
+        right: 1.25rem;
+        top: 1rem;
+        z-index: 999;
+      }
+    }
+  }
+}

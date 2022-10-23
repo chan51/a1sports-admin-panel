@@ -1,0 +1,12 @@
+.secondList {
+    padding-top: 35px;
+    border-top: 1px solid #c5c5c5;
+    margin-top: 35px;
+}
+
+:host {
+    min-height: calc(100vh - 100px);
+    display: block;
+   
+}
+

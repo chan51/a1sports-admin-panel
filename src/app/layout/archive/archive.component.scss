@@ -1,0 +1,72 @@
+.report-content-btn {
+  position: absolute;
+  top: -40px;
+  right: 15px;
+  background: #007bff;
+}
+
+.reportDIV {
+  height: 350px;
+
+  .reportButtonDIV {
+    display: block;
+  }
+
+  .addUserDiv {
+    display: block;
+    position: absolute;
+    margin-top: -40px;
+  }
+
+  .dropdown {
+    .dropdownMenu {
+      padding: 0;
+      height: 130px;
+
+      select {
+        border: none;
+        height: 100%;
+      }
+    }
+  }
+}
+
+.spinner .innerDiv > div {
+  background-color: #111541;
+}
+
+.image-modal {
+  img,
+  video {
+    width: 100%;
+    max-height: 500px;
+    height: 100%;
+    outline: none;
+    display: block;
+  }
+}
+
+.file-upload {
+  .file-upload-content {
+    text-align: start !important;
+    display: inline-block !important;
+    width: 160px !important;
+    height: 160px !important;
+
+    .file-upload-image {
+      max-height: 170px !important;
+      max-width: 170px !important;
+      margin: auto !important;
+      display: inline-block !important;
+    }
+  }
+}
+
+::ng-deep {
+  .otherDetails {
+    overflow: hidden;
+    .datatable-body-cell-label {
+      display: block !important;
+    }
+  }
+}

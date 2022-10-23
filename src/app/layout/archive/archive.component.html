@@ -1,0 +1,490 @@
+<div class="spinner" *ngIf="loader">
+  <div class="innerDiv">
+    <div class="bounce1"></div>
+    <div class="bounce2"></div>
+    <div class="bounce3"></div>
+  </div>
+</div>
+
+<div [@routerTransition]>
+  <app-page-header *ngIf="!hideSnackBar" [heading]="'Chat Archive'" [icon]="'fa-archive'"></app-page-header>
+  <ngb-alert *ngIf="errorMessage?.type == 'api'" type="danger" (close)="errorMessage = {}"
+    >{{ errorMessage?.message }}
+  </ngb-alert>
+
+  <div
+    *ngIf="!hideSnackBar"
+    class="reportDIV"
+    [style.height.px]="formSubmitted ? (errorMessage?.type != '' ? 250 : 200) : 350"
+  >
+    <ngb-alert
+      *ngIf="!selectedFile?.filePath && errorMessage?.type != ''"
+      type="danger"
+      (close)="errorMessage = { type: '', message: '' }"
+    >
+      {{ errorMessage?.message }}</ngb-alert
+    >
+    <div class="row align-items-end">
+      <div class="col col-xl-2 col-lg-2">
+        <fieldset class="form-group">
+          <label>Select User</label>
+          <div class="input-group">
+            <select class="form-control" name="userId" (change)="filterUsers($event.target.value)">
+              <option value="">All</option>
+              <option [value]="user.id" *ngFor="let user of userList">{{ user.name }}</option>
+            </select>
+          </div>
+        </fieldset>
+        <div class="addUserDiv">
+          <fieldset class="form-group">
+            <label>&nbsp;</label>
+            <button type="button" class="btn btn-secondary" (click)="onAction(-1, addContent, 'Add Video')">
+              Add Video
+            </button>
+          </fieldset>
+        </div>
+      </div>
+      <div class="col col-xl-2 col-lg-2">
+        <fieldset class="form-group">
+          <label>Start date</label>
+          <div class="input-group datepicker-input">
+            <input
+              class="form-control"
+              placeholder="dd-mm-yyyy"
+              name="startDate"
+              [(ngModel)]="reportData.startDate"
+              ngbDatepicker
+              #sd="ngbDatepicker"
+              [maxDate]="todayDate"
+              (dateSelect)="errorMessage = { type: '', message: '' }"
+              (click)="sd.toggle(); ed.close()"
+            />
+            <button
+              class="input-group-addon btn"
+              style="margin: 0 0 -2px 0"
+              type="button"
+              (click)="sd.toggle(); ed.close()"
+            >
+              <span class="fa fa-calendar"></span>
+            </button>
+          </div>
+        </fieldset>
+      </div>
+      <div class="col col-xl-2 col-lg-2">
+        <fieldset class="form-group">
+          <label>End date</label>
+          <div class="input-group datepicker-input">
+            <input
+              class="form-control"
+              placeholder="dd-mm-yyyy"
+              name="endDate"
+              [(ngModel)]="reportData.endDate"
+              ngbDatepicker
+              #ed="ngbDatepicker"
+              [minDate]="reportData.startDate"
+              (dateSelect)="errorMessage = { type: '', message: '' }"
+              (click)="sd.close(); ed.toggle()"
+            />
+            <button
+              class="input-group-addon btn"
+              style="margin: 0 0 -2px 0"
+              type="button"
+              (click)="sd.close(); ed.toggle()"
+            >
+              <span class="fa fa-calendar"></span>
+            </button>
+          </div>
+        </fieldset>
+      </div>
+      <div class="col col-xl-1 col-lg-1">
+        <fieldset class="form-group">
+          <label>Is Reported</label>
+          <div class="input-group datepicker-input">
+            <input class="form-control" type="checkbox" name="reported" [(ngModel)]="reportData.reported" />
+          </div>
+        </fieldset>
+      </div>
+      <div class="col col-xl-2 col-lg-2 form-inline text-right reportButtonDIV">
+        <fieldset class="form-group">
+          <label>&nbsp;</label>
+          <button type="button" class="btn btn-secondary" (click)="sd.close(); ed.close(); getFiles()">
+            Get Archive
+          </button>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col col-xl-12 col-lg-12">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs" [class.hide-tabnav-header]="hideSnackBar">
+        <li [ngbNavItem]="1">
+          <a ngbNavLink>Images</a>
+          <ng-template ngbNavContent>
+            <div class="customTable" *ngIf="chatMedia?.images">
+              <ngx-datatable
+                [rows]="chatMedia?.images"
+                [columns]="columns"
+                [columnMode]="'force'"
+                class="material expandable"
+                [loadingIndicator]="loadingIndicator"
+                [headerHeight]="50"
+                [footerHeight]="50"
+                [rowHeight]="'auto'"
+                [limit]="limitData"
+                [externalPaging]="true"
+                [externalSorting]="true"
+                [count]="chatMedia?.images.length"
+                [offset]="pageNumber"
+                (sort)="onSort($event)"
+                (page)="setPage($event)"
+                [selectionType]="'checkbox'"
+                (select)="onSelect($event)"
+              >
+                <!-- Column Templates -->
+                <ngx-datatable-column
+                  [width]="30"
+                  [sortable]="false"
+                  [canAutoResize]="false"
+                  [draggable]="false"
+                  [resizeable]="false"
+                  [headerCheckboxable]="true"
+                  [checkboxable]="true"
+                >
+                </ngx-datatable-column>
+                <ngx-datatable-column name="" [width]="120" [canAutoResize]="false">
+                  <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-cell-template>
+                    <strong>{{ skipData + rowIndex + 1 }}</strong>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column name="Posted By">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <div>
+                      <strong>Name</strong>
+                      <p>{{ row?.userName }}</p>
+                    </div>
+                    <div>
+                      <strong>Phone</strong>
+                      <p>{{ row?.userId?.mobile }} ({{ row?.userId?.countryCode }})</p>
+                    </div>
+                    <div>
+                      <strong>Email</strong>
+                      <p>{{ row?.userId?.email }}</p>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column name="File">
+                  <ng-template let-value="value" let-row="row" ngx-datatable-cell-template>
+                    <img
+                      style="width: 120px; height: 120px"
+                      [src]="row?.cloudinaryURL || row?.filePath"
+                      onerror="this.src='assets/images/nofile.png'"
+                      (click)="openMediaModal(fileModal, row, 'image')"
+                    />
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column name="Upload Date">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    {{ row?.updatedAt | date: 'dd/MM/yyyy' }}
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-column name="Other Details" cellClass="otherDetails">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <div>
+                      <strong>Description</strong>
+                      <p>{{ row?.description }}</p>
+                    </div>
+                    <div>
+                      <strong>Location</strong>
+                      <p>{{ row?.location }}</p>
+                    </div>
+                    <div>
+                      <strong>People</strong>
+                      <p>{{ row?.people }}</p>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-footer>
+                  <ng-template
+                    ngx-datatable-footer-template
+                    let-rowCount="rowCount"
+                    let-pageSize="pageSize"
+                    let-selectedCount="selectedCount"
+                    let-curPage="curPage"
+                    let-offset="offset"
+                  >
+                    <div class="footer" style="padding: 5px 10px; width: 100%">
+                      <div>{{ selectedRows?.length }} selected / {{ chatMedia?.images.length }} total</div>
+                      <div>
+                        <a
+                          *ngFor="let data of arrayFromLength(chatMedia?.images.length); let idx = index"
+                          (click)="setPage({ offset: idx })"
+                        >
+                          {{ idx }}
+                        </a>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-footer>
+              </ngx-datatable>
+            </div>
+          </ng-template>
+        </li>
+        <li [ngbNavItem]="2">
+          <a ngbNavLink>Videos</a>
+          <ng-template ngbNavContent>
+            <div class="customTableOuter" *ngIf="chatMedia?.videos">
+              <ngx-datatable
+                class="customTable"
+                [rows]="chatMedia?.videos"
+                [columnMode]="ColumnMode.standard"
+                [headerHeight]="38"
+                [footerHeight]="50"
+                rowHeight="auto"
+                [count]="chatMedia?.videos.length"
+                [offset]="pageNumber"
+                [draggable]="false"
+                [selected]="selectedRows"
+                [selectionType]="'checkbox'"
+                [selectAllRowsOnPage]="true"
+                [displayCheck]="shouldCheck"
+                [selectCheck]="shouldCheck"
+                (select)="onSelect($event)"
+              >
+                <!-- Column Templates -->
+                <ngx-datatable-column
+                  [width]="30"
+                  [sortable]="false"
+                  [canAutoResize]="false"
+                  [draggable]="false"
+                  [resizeable]="false"
+                  [headerCheckboxable]="true"
+                  [checkboxable]="true"
+                >
+                </ngx-datatable-column>
+                <ngx-datatable-column name="No" [sortable]="true" [canAutoResize]="false">
+                  <ng-template let-rowIndex="rowIndex" let-value="value" ngx-datatable-cell-template>
+                    <strong>{{ skipData + rowIndex + 1 }}</strong>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column name="Posted By">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <div>
+                      <strong>Name</strong>
+                      <p>{{ row?.userName }}</p>
+                    </div>
+                    <div>
+                      <strong>Phone</strong>
+                      <p>{{ row?.userId?.mobile }} ({{ row?.userId?.countryCode }})</p>
+                    </div>
+                    <div>
+                      <strong>Email</strong>
+                      <p>{{ row?.userId?.email }}</p>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column name="File">
+                  <ng-template let-value="value" let-row="row" ngx-datatable-cell-template>
+                    <img
+                      style="width: 120px; height: 120px"
+                      [src]="row?.thumb"
+                      onerror="this.src='assets/images/nofile.png'"
+                      (click)="openMediaModal(fileModal, row, 'video')"
+                    />
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-column name="Upload Date">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    {{ row?.updatedAt | date: 'dd/MM/yyyy' }}
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-column name="Other Details">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <div>
+                      Description
+                      <span class="list"> {{ row?.description }}</span>
+                    </div>
+                    <div>
+                      Location
+                      <span class="list"> {{ row?.location }}</span>
+                    </div>
+                    <div>
+                      People
+                      <span class="list"> {{ row?.people }}</span>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-footer>
+                  <!-- <ng-template
+                    ngx-datatable-footer-template
+                    let-rowCount="rowCount"
+                    let-pageSize="pageSize"
+                    let-selectedCount="selectedCount"
+                    let-curPage="curPage"
+                    let-offset="offset"
+                  > -->
+                  <ng-template ngx-datatable-footer-template>
+                    <div class="footer" style="padding: 5px 10px; width: 100%">
+                      <div>{{ selectedRows?.length }} selected / {{ chatMedia?.videos.length }} total</div>
+                      <div class="">
+                        <a
+                          *ngFor="let data of arrayFromLength(chatMedia?.videos.length); let idx = index"
+                          (click)="setPage({ offset: idx })"
+                        >
+                          {{ idx }}
+                        </a>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-footer>
+              </ngx-datatable>
+            </div>
+          </ng-template>
+        </li>
+      </ul>
+      <div ngbDropdown #mediaOption="ngbDropdown" container="body">
+        <button class="btn report-content-btn" [disabled]="!selectedRows.length" id="mediaOption" ngbDropdownToggle>
+          Media Option
+        </button>
+        <div ngbDropdownMenu aria-labelledby="mediaOption" class="dropdown-menu dropdown-menu-right">
+          <button ngbDropdownItem (click)="reportContent(mediaOption)">Report Content</button>
+          <button ngbDropdownItem (click)="deleteContent(mediaOption)">Delete Content</button>
+        </div>
+      </div>
+      <div [ngbNavOutlet]="nav" class="mt-2"></div>
+    </div>
+  </div>
+</div>
+
+<ng-template #fileModal let-c="close" let-d="dismiss">
+  <div class="modal-body image-modal">
+    <!-- <button type="button" (click)="downloadFile(filePath + selectedFile.filePath)">
+      <span aria-hidden="true">&times; Download</span>
+    </button> -->
+    <button type="button" class="close" aria-label="Close" (click)="d()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <ng-container
+      *ngTemplateOutlet="
+        !canList.includes(selectedFile.canList) && actionButton;
+        context: { fileId: selectedFile.id, type: 'video' }
+      "
+    ></ng-container>
+
+    <img
+      *ngIf="selectedFile?.type == 'image' || selectedFile?.fileType == 'image'"
+      [src]="selectedFile?.cloudinaryURL || selectedFile?.filePath"
+      onerror="this.src='assets/images/nofile.png'"
+    />
+    <video autoplay controls *ngIf="selectedFile?.type == 'video' || selectedFile?.fileType == 'video'">
+      <source [src]="selectedFile?.cloudinaryURL || selectedFile?.filePath" />
+    </video>
+
+    <div>
+      <label>Description</label>
+      <p>{{ selectedFile?.description }}</p>
+    </div>
+  </div>
+</ng-template>
+
+<!-- <ng-template #actionButton let-fileId="fileId" let-type="type">
+  <div ngbDropdown #actionDrop="ngbDropdown" class="d-inline-block">
+    <button class="btn btn-outline-primary" ngbDropdownAnchor (focus)="actionDrop.toggle()">Action</button>
+    <div ngbDropdownMenu>
+      <button ngbDropdownItem (click)="approveMedia(fileId, 'approve', type); actionDrop.close()">Approve</button>
+      <button ngbDropdownItem (click)="approveMedia(fileId, 'disapprove', type); actionDrop.close()">Disapprove</button>
+    </div>
+  </div>
+</ng-template> -->
+
+<ng-template #addContent let-c="close" let-d="dismiss">
+  <div class="spinner" *ngIf="modalLoader">
+    <div class="innerDiv">
+      <div class="bounce1"></div>
+      <div class="bounce2"></div>
+      <div class="bounce3"></div>
+    </div>
+  </div>
+  <div class="modal-header showError">
+    <h5 class="modal-title">
+      {{ selected?.action }} <strong *ngIf="selected?.action == 'edit'">{{ selected?.title }}</strong>
+    </h5>
+    <ngb-alert *ngIf="errorMessage" type="danger" (close)="errorMessage = null">{{ errorMessage }}</ngb-alert>
+    <button type="button" class="close" aria-label="Close" (click)="d()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form role="form" autocomplete="off" [formGroup]="addForm">
+      <div class="row">
+        <div class="col col-xl-12 col-md-12 col-lg-12">
+          <fieldset class="form-group">
+            <label>Title</label>
+            <input class="form-control" autocomplete="off" name="title" formControlName="title" />
+          </fieldset>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col col-xl-6 col-md-6 col-lg-6">
+          <fieldset class="form-group">
+            <label>Special Ingredient</label>
+            <input
+              class="form-control"
+              autocomplete="off"
+              name="specialIngredient"
+              formControlName="specialIngredient"
+            />
+          </fieldset>
+        </div>
+        <div class="col col-xl-6 col-md-6 col-lg-6">
+          <fieldset class="form-group">
+            <label>Add File</label>
+            <div class="file-upload">
+              <div class="image-upload-wrap">
+                <input class="file-upload-input" type="file" (change)="handleInputChange($event)" accept="image/*" />
+                <!-- <div class="drag-text">
+                  <span>Drag and drop a file or select add Image</span>
+                </div> -->
+              </div>
+              <div class="file-upload-content" *ngIf="selected?.pictures?.coverPhoto">
+                <img
+                  class="file-upload-image"
+                  [src]="f.coverPhoto.value ? imagePath + f.coverPhoto.value : selected?.pictures.coverPhoto"
+                  alt="your image"
+                />
+                <div class="image-title-wrap">
+                  <button type="button" (click)="selected?.pictures.coverPhoto = ''" class="remove-image">
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col col-xl-12 col-md-12 col-lg-12">
+          <fieldset class="form-group">
+            <label>Description</label>
+            <textarea
+              class="form-control"
+              autocomplete="off"
+              name="description"
+              formControlName="description"
+            ></textarea>
+          </fieldset>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" (click)="c()">Cancel</button>
+    <button type="submit" class="btn btn-secondary" (click)="formSubmit(c)">Submit</button>
+  </div>
+</ng-template>

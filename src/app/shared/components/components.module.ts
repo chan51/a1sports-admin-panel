@@ -4,18 +4,15 @@ import { RouterModule } from '@angular/router';
 
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 
-import {
-  HeaderComponent,
-  PageHeaderComponent,
-  SidebarComponent,
-  ToastsContainerComponent,
-} from './';
+import { HeaderComponent, PageHeaderComponent, SidebarComponent, ToastsContainerComponent } from './';
+import { TwoDigitDecimaNumberDirective } from '../directives/TwoDigitDecimaNumberDirective';
 
 const COMPONENTS = [
   HeaderComponent,
   PageHeaderComponent,
   SidebarComponent,
   ToastsContainerComponent,
+  TwoDigitDecimaNumberDirective,
 ];
 
 @NgModule({

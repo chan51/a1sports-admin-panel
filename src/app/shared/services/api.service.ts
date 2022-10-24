@@ -14,7 +14,7 @@ export class APIService {
       ssid: this.userId || '',
     }),
   };
-  // public baseURL = 'http://192.168.43.60:1410/';
+  // public baseURL = 'http://192.168.214.208:1410/';
   public baseURL = 'https://sportyfy.io/a1sports/';
 
   logoutHitted = false;

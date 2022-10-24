@@ -9,7 +9,7 @@ import { APIService } from '../../shared/services/api.service';
 import { URL_LIST } from '@app/shared/const/api-urls.const';
 import { ToastService } from '@app/shared';
 import { Selection } from '@app/shared/models/selection';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Player } from '@app/shared/models/players';
 import { IDropdownSettings } from 'ng-multiselect-dropdown';
 
@@ -70,6 +70,13 @@ export class PlayersComponent implements OnInit {
     return this.playerForm.controls;
   }
 
+  isNumberCheck(): ValidatorFn {
+    return (c: AbstractControl): { [key: string]: boolean } | null => {
+      let isValidNumber = /^\d{0,2}\.?\d{0,2}$/g.test(c.value);
+      return isValidNumber ? null : { value: isValidNumber };
+    };
+  }
+
   constructor(
     public router: Router,
     public apiService: APIService,
@@ -89,11 +96,11 @@ export class PlayersComponent implements OnInit {
 
   setForms() {
     this.playerForm = this.fb.group({
-      id: ['', [Validators.required]],
+      id: [''],
       name: ['', [Validators.required]],
       team: ['', [Validators.required]],
       role: ['', [Validators.required]],
-      value: ['', [Validators.required]],
+      value: ['', [Validators.required, this.isNumberCheck()]],
     });
   }
 

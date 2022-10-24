@@ -139,6 +139,7 @@
             <ng-template let-row="row" let-value="value" ngx-datatable-cell-template let-rowIndex="rowIndex">
               <div class="grid-option-buttons">
                 <button class="btn approve" (click)="onAction(rowIndex, playerModal, 'edit')">Edit</button>
+                <button class="btn reject" (click)="onAction(rowIndex, deleteModal, 'delete')">Delete</button>
               </div>
             </ng-template>
           </ngx-datatable-column>
@@ -220,7 +221,13 @@
         <div class="col col-xl-6 col-md-6 col-lg-6">
           <fieldset class="form-group">
             <label>Value</label>
-            <input class="form-control" autocomplete="off" name="value" formControlName="value" />
+            <input
+              class="form-control"
+              autocomplete="off"
+              name="value"
+              formControlName="value"
+              appTwoDigitDecimaNumber
+            />
           </fieldset>
         </div>
       </div>
@@ -262,7 +269,7 @@
 
   <div class="modal-footer">
     <button type="button" class="btn btn-default" (click)="c()">Cancel</button>
-    <button type="button" class="btn btn-secondary" (click)="formSubmit(c)">Submit</button>
+    <button class="btn btn-secondary" [disabled]="playerForm.invalid" (click)="formSubmit(c)">Submit</button>
   </div>
 </ng-template>
 

@@ -12,6 +12,8 @@ import { Selection } from '@app/shared/models/selection';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Player } from '@app/shared/models/players';
 import { IDropdownSettings } from 'ng-multiselect-dropdown';
+import { PlayerRoles } from '@app/shared/const/player-roles.const';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-players',
@@ -25,6 +27,7 @@ export class PlayersComponent implements OnInit {
   skipData = 0;
   limitData = 10;
   totalPlayers = 0;
+  allTeams = [];
   pageNumber = 0;
   playerType: any = '';
   userId = this.apiService.userId;
@@ -91,7 +94,6 @@ export class PlayersComponent implements OnInit {
   ngOnInit() {
     this.setForms();
     this.getList();
-    this.dropdownLists();
   }
 
   setForms() {
@@ -114,28 +116,37 @@ export class PlayersComponent implements OnInit {
     this.players = [];
     this.players = [];
     this.totalPlayers = 0;
+
+    if (this.playerRequest) {
+      this.playerRequest.unsubscribe();
+    }
   }
 
+  playerRequest = null;
   getList() {
     this.nullData();
     const params = {
-      limit: 10,
+      limit: this.playerType ? null : 10,
       skip: this.skipData,
-      searchKeyword: this.searchValue,
+      searchKeyword: this.searchValue || this.playerType,
       allPlayers: true,
+      teamName: this.playerType,
     };
-    this.apiService.postData(URL_LIST.Players.GetPlayers, params).subscribe(
-      (response) => {
-        this.loader = false;
-        this.loadingIndicator = false;
-        this.setPlayers(response);
-      },
-      (error) => {
-        this.toastService.showError('Please try again!');
-        this.loadingIndicator = false;
-        this.loader = false;
-      },
-    );
+    this.playerRequest = this.apiService
+      .postData(URL_LIST.Players.GetPlayers, params)
+      .pipe(debounceTime(500), distinctUntilChanged())
+      .subscribe(
+        (response) => {
+          this.loader = false;
+          this.loadingIndicator = false;
+          this.setPlayers(response);
+        },
+        (error) => {
+          this.toastService.showError('Please try again!');
+          this.loadingIndicator = false;
+          this.loader = false;
+        },
+      );
   }
 
   setPlayers(response) {
@@ -145,41 +156,26 @@ export class PlayersComponent implements OnInit {
       });
       this.temp = [...response.players];
       this.players = response.players;
+      this.dropdownLists(response.allTeams);
+
+      this.playerType && (this.limitData = response.playersLength);
       this.totalPlayers = this.hideSnackBar ? this.limitData : response.playersLength;
     }
   }
 
-  dropdownLists() {
+  dropdownLists(allTeams) {
     this.dropdownList = {
-      teams: [
-        { id: 'India', value: 'India' },
-        { id: 'australia', value: 'Australia' },
-        { id: 'Pakistan', value: 'Pakistan' },
-        { id: 'South Africa', value: 'South Africa' },
-        { id: 'New Zealand', value: 'New Zealand' },
-        { id: 'Sri Lanka', value: 'Sri Lanka' },
-        { id: 'England', value: 'England' },
-        { id: 'West Indies', value: 'West Indies' },
-        { id: 'Zimbabwe', value: 'Zimbabwe' },
-        { id: 'Bangladesh', value: 'Bangladesh' },
-        { id: 'Namibia', value: 'Namibia' },
-        { id: 'Ireland', value: 'Ireland' },
-        { id: 'Canada', value: 'Canada' },
-        { id: 'Netherlands', value: 'Netherlands' },
-        { id: 'Scotland', value: 'Scotland' },
-        { id: 'Afghanistan', value: 'Afghanistan' },
-        { id: 'United Arab Emirates', value: 'United Arab Emirates' },
-      ],
-      roles: [
-        { id: 'All-Rounder', value: 'All-Rounder' },
-        { id: 'Bowler', value: 'Bowler' },
-        { id: 'Batter', value: 'Batter' },
-        { id: 'Wicket-Keeper', value: 'Wicket-Keeper' },
-      ],
+      teams: allTeams,
+      roles: PlayerRoles,
     };
   }
 
   filterPlayers(playerType) {
+    if (playerType) {
+      this.limitData = null;
+    } else {
+      this.limitData = 10;
+    }
     this.playerType = playerType;
     this.getList();
   }
@@ -222,7 +218,7 @@ export class PlayersComponent implements OnInit {
   }
 
   arrayFromLength(length) {
-    return Array.from({ length: Math.ceil(length / this.limitData) });
+    return Array.from({ length: Math.ceil(length / this.limitData || length) });
   }
 
   toggleExpandRow(row) {

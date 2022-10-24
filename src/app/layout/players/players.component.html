@@ -11,7 +11,14 @@
   <div class="row">
     <div class="col col-xl-12 col-lg-12">
       <div class="filters">
-        <input type="text" class="search-box" placeholder="Type to filter players..." (keyup)="updateFilter($event)" />
+        <input type="text" class="search-box" placeholder="Type to filter players..." (input)="updateFilter($event)" />
+        <select class="filter-box" name="userType" (change)="filterPlayers($event.target.value)">
+          <option value="" [selected]="playerType === ''">All</option>
+          <option *ngFor="let team of dropdownList.teams" [value]="team.id" [selected]="playerType === team.id">
+            {{ team.name }}
+          </option>
+        </select>
+
         <div *ngIf="!showAll" class="refreshIcon btn" (click)="getList()" placement="top" ngbTooltip="Refresh">
           Refresh
         </div>
@@ -202,7 +209,7 @@
           <fieldset class="form-group">
             <label>Team</label>
             <select name="team" formControlName="team" class="form-control">
-              <option *ngFor="let team of dropdownList.teams" [value]="team.id">{{ team.value }}</option>
+              <option *ngFor="let team of dropdownList.teams" [value]="team.id">{{ team.name }}</option>
             </select>
           </fieldset>
         </div>

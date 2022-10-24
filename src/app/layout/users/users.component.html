@@ -79,8 +79,8 @@
                 </div>
                 <div class="col col-xl-4 col-md-4 col-lg-4" *ngIf="selectedRow.userType">
                   <div>
-                    <div><strong>User Type</strong></div>
-                    <div>{{ selectedRow.userType.toUpperCase() }}</div>
+                    <div><strong>Coins</strong></div>
+                    <div>{{ selectedRow.coins || 0 }}</div>
                   </div>
                 </div>
 
@@ -143,14 +143,14 @@
               <strong>{{ value }}</strong>
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="User Type">
+          <ngx-datatable-column name="Coins">
             <ng-template let-value="value" ngx-datatable-cell-template>
               <strong>{{ value }}</strong>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="Status" [width]="40">
             <ng-template let-value="value" ngx-datatable-cell-template>
-              <strong [ngClass]="value">{{ value }}</strong>
+              <strong>{{ value || 0 }}</strong>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="Action" [width]="350" [canAutoResize]="false">

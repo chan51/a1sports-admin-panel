@@ -114,6 +114,16 @@
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="" [width]="120" [canAutoResize]="false">
+            <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-header-template>
+              <span class="selected-row-count">{{ selectedRows.length ? selectedRows.length + ' selected' : '' }}</span>
+              <button
+                *ngIf="selectedRows.length"
+                class="selected-row-button"
+                (click)="onAction(rowIndex, statusModal, 'delete')"
+              >
+                Toggle Status
+              </button>
+            </ng-template>
             <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-cell-template>
               <strong>{{ skipData + rowIndex + 1 }}</strong>
               <div class="image-element">
@@ -140,6 +150,11 @@
           <ngx-datatable-column name="Coin" [width]="40">
             <ng-template let-row="row" ngx-datatable-cell-template>
               <strong>{{ row.value || 0 }}</strong>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Status" [width]="40">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <strong>{{ row.isEnable ? 'Active' : 'Inactive' }}</strong>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="Action" [width]="350" [canAutoResize]="false">
@@ -309,17 +324,31 @@
   </div>
 </ng-template>
 
-<ng-template #approveModal let-c="close" let-d="dismiss" backdrop="false">
+<ng-template #statusModal let-c="close" let-d="dismiss" backdrop="false">
   <div class="modal-header">
-    <h5 class="modal-title" id="exampleModalLabel">
-      Update player status to {{ approvePlayerData?.status ? 'Approve' : 'Disable' }}
-    </h5>
+    <h5 class="modal-title" id="exampleModalLabel">Update player status</h5>
     <button type="button" class="close" aria-label="Close" (click)="d()">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
+  <div class="modal-body user-form">
+    <div class="row">
+      <div class="col col-xl-12 col-md-12 col-lg-12">
+        <fieldset class="form-group">
+          <label>Status</label>
+          <select name="status" class="form-control" [(ngModel)]="updatedPlayersStatus">
+            <option value=""></option>
+            <option value="true">Enable</option>
+            <option value="false">Disable</option>
+          </select>
+        </fieldset>
+      </div>
+    </div>
+  </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="c()">Cancel</button>
-    <button type="button" class="btn btn-danger" (click)="onApprove(c)">Yes</button>
+    <button type="button" class="btn btn-danger" [disabled]="updatedPlayersStatus == ''" (click)="onApprove(c)">
+      Update
+    </button>
   </div>
 </ng-template>

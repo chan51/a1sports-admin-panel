@@ -19,6 +19,7 @@ export const URL_LIST = {
     CreatePlayer: 'api/v1/create-player',
     UpdatePlayer: 'api/v1/update-player',
     DeletePlayers: 'api/v1/delete-players',
+    UpdatePlayersStatus: 'api/v1/update-players-status',
   },
 
   FAQs: {

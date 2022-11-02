@@ -31,6 +31,7 @@ export class PlayersComponent implements OnInit {
   pageNumber = 0;
   playerType: any = '';
   userId = this.apiService.userId;
+  playerRequest = null;
 
   dropdownList = {
     roles: [],
@@ -56,6 +57,7 @@ export class PlayersComponent implements OnInit {
   columns = [{ name: 'Name' }, { name: 'Team' }, { name: 'Coin' }, { prop: 'Action' }];
   loadingIndicator: boolean = true;
   @ViewChild('table') table: DatatableComponent;
+  updatedPlayersStatus = null;
 
   days = [];
   todayDate;
@@ -111,6 +113,8 @@ export class PlayersComponent implements OnInit {
     this.loader = true;
     this.modalLoader = false;
     this.loadingIndicator = true;
+    this.selectedRows = [];
+    this.updatedPlayersStatus = null;
 
     this.temp = [];
     this.players = [];
@@ -122,7 +126,6 @@ export class PlayersComponent implements OnInit {
     }
   }
 
-  playerRequest = null;
   getList() {
     this.nullData();
     const params = {
@@ -233,6 +236,7 @@ export class PlayersComponent implements OnInit {
 
   onAction(index, modal, action) {
     this.errorMessage = null;
+    this.updatedPlayersStatus = null;
     let selected: any = this.players[index] || {};
     this.selected = {
       action,
@@ -339,6 +343,19 @@ export class PlayersComponent implements OnInit {
       },
     };
     this.apiService.putData(URL_LIST.Players.DeletePlayers, data).subscribe(
+      (response) => response.status && (this.getList(), c()),
+      (error) => error,
+    );
+  }
+
+  onApprove(c) {
+    const data = {
+      data: {
+        ids: [...this.selectedRows.map((selectedRow) => selectedRow.id)],
+        isEnable: this.updatedPlayersStatus === 'true',
+      },
+    };
+    this.apiService.putData(URL_LIST.Players.UpdatePlayersStatus, data).subscribe(
       (response) => response.status && (this.getList(), c()),
       (error) => error,
     );

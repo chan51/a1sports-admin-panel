@@ -59,7 +59,8 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "a1sports-app:build"
+            "browserTarget": "a1sports-app:build",
+            "port": 1411
           },
           "configurations": {
             "production": {

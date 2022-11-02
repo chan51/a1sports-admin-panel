@@ -460,3 +460,19 @@ button:focus {
 
 }
 }
+
+.selected-row-count {
+  text-transform: capitalize;
+  &::after {
+    content: "";
+    border-right: 1px solid #ccc;
+    width: 10px;
+    height: 10px;
+    color: #d3d3d3;
+    padding-left: 7px;
+  }
+}
+.selected-row-button {
+  border: none;
+  color: #3185fc;
+}

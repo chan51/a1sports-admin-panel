@@ -14,8 +14,8 @@ export class APIService {
       ssid: this.userId || '',
     }),
   };
-  public baseURL = 'http://192.168.1.6:1410/';
-  // public baseURL = 'https://sportyfy.io/a1sports/';
+  // public baseURL = 'http://192.168.1.6:1410/';
+  public baseURL = 'https://sportyfy.io/a1sports/';
 
   logoutHitted = false;
   unsub: Subject<any> = new Subject();

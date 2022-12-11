@@ -1,8 +1,8 @@
-import { Observable, Subject, throwError } from 'rxjs';
-import { Router } from '@angular/router';
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 
+import { Observable, Subject, throwError } from 'rxjs';
 import { map, catchError, takeUntil } from 'rxjs/operators';
 
 @Injectable()
@@ -14,8 +14,8 @@ export class APIService {
       ssid: this.userId || '',
     }),
   };
-  // public baseURL = 'http://192.168.1.6:1410/';
-  public baseURL = 'https://sportyfy.io/a1sports/';
+  // public baseURL = 'http://localhost:1410/';
+  public baseURL = 'https://sportyfy.io/a1sports-qa/';
 
   logoutHitted = false;
   unsub: Subject<any> = new Subject();

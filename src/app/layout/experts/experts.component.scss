@@ -1,0 +1,56 @@
+.grid-option-buttons {
+  button {
+    display: inline-block;
+    margin-right: 24px;
+    margin-bottom: 10px;
+  }
+}
+
+.radio-group label {
+  width: 100%;
+}
+
+.line-height-label {
+  height: 50px;
+}
+
+.inline-block-upload {
+  .file-upload {
+    display: inline-block;
+  }
+}
+
+.user-form {
+  .btn-group {
+    display: block;
+  }
+}
+
+.schedule-calendar {
+  padding-left: 16px;
+  display: inline-block;
+  width: 10px;
+  span {
+    cursor: pointer;
+  }
+}
+
+.file-upload .drag-text {
+  text-align: center;
+  padding-top: 20px;
+
+  img {
+    width: 100px;
+    height: 100px;
+    display: block;
+    margin: 0 auto;
+    z-index: 1;
+    opacity: 0.6;
+  }
+}
+
+.input-group-append {
+  position: absolute;
+  top: 30px;
+  right: 16px;
+}

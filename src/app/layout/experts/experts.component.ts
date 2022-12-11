@@ -1,42 +1,42 @@
 import { Router } from '@angular/router';
-import { DatatableComponent } from '@swimlane/ngx-datatable';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Component, OnInit, Input, ViewChild } from '@angular/core';
-import { NgbModal, NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
 
+import { Subject } from 'rxjs';
 import * as moment from 'moment';
-import { routerTransition } from '../../router.animations';
-import { APIService } from '../../shared/services/api.service';
-import { URL_LIST } from '@app/shared/const/api-urls.const';
-import { ToastService } from '@app/shared';
-import { Selection } from '@app/shared/models/selection';
-import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { Player } from '@app/shared/models/players';
 import { IDropdownSettings } from 'ng-multiselect-dropdown';
-import { PlayerRoles } from '@app/shared/const/player-roles.const';
+import { DatatableComponent } from '@swimlane/ngx-datatable';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { of, Subject } from 'rxjs';
+import { NgbModal, NgbDropdownConfig, NgbCalendar, NgbDate } from '@ng-bootstrap/ng-bootstrap';
+
+import { ToastService } from '@app/shared';
+import { User } from '@app/shared/models/user';
+import { Selection } from '@app/shared/models/selection';
+import { URL_LIST } from '@app/shared/const/api-urls.const';
+
+import { routerTransition } from '@app/router.animations';
+import { APIService } from '@app/shared/services/api.service';
 
 @Component({
-  selector: 'app-players',
-  templateUrl: './players.component.html',
-  styleUrls: ['./players.component.scss'],
+  selector: 'app-experts',
+  templateUrl: './experts.component.html',
+  styleUrls: ['./experts.component.scss'],
   animations: [routerTransition()],
 })
-export class PlayersComponent implements OnInit {
+export class ExpertsComponent implements OnInit {
   temp = [];
-  players: Player[] = [];
+  experts: User[] = [];
   skipData = 0;
   limitData = 10;
-  totalPlayers = 0;
-  allTeams = [];
+  totalExperts = 0;
   pageNumber = 0;
-  playerType: any = '';
+  maxDate: NgbDate | null;
   userId = this.apiService.userId;
-  playerRequest = null;
 
   dropdownList = {
-    roles: [],
-    teams: [],
+    genders: [],
+    status: [],
+    userTypes: [],
   };
   dropdownSettings: IDropdownSettings = {
     singleSelection: true,
@@ -52,14 +52,14 @@ export class PlayersComponent implements OnInit {
   password = '';
   selected: Selection;
   selectedRows = [];
-  selectedRow: Player = null;
+  selectedRow: User = null;
   selectedImage = '';
-  approvePlayerData;
-  columns = [{ name: 'Name' }, { name: 'Team' }, { name: 'Coin' }, { prop: 'Action' }];
+  approveUserData;
+  columns = [{ name: 'Name' }, { name: 'Login Name' }, { name: 'User Type' }, { name: 'Status' }, { prop: 'Action' }];
   loadingIndicator: boolean = true;
   @ViewChild('table') table: DatatableComponent;
-  updatedPlayersStatus = null;
-  updatedPlayersTicker = '';
+  userTypeData;
+  selectedExitingUsers;
 
   days = [];
   todayDate;
@@ -70,18 +70,16 @@ export class PlayersComponent implements OnInit {
   errorMessage: string;
   imagePath = this.apiService.baseURL;
 
-  playerForm: FormGroup;
+  userForm: FormGroup;
+  addContentForm: FormGroup;
   searchValue: Subject<any> = new Subject<any>();
 
   get f() {
-    return this.playerForm.controls;
+    return this.userForm.controls;
   }
 
-  isNumberCheck(): ValidatorFn {
-    return (c: AbstractControl): { [key: string]: boolean } | null => {
-      let isValidNumber = /^\d{0,2}\.?\d{0,2}$/g.test(c.value);
-      return isValidNumber ? null : { value: isValidNumber };
-    };
+  get fAC() {
+    return this.addContentForm.controls;
   }
 
   constructor(
@@ -89,108 +87,115 @@ export class PlayersComponent implements OnInit {
     public apiService: APIService,
     public modalService: NgbModal,
     private fb: FormBuilder,
+    private calendar: NgbCalendar,
     public config: NgbDropdownConfig,
     public toastService: ToastService,
   ) {
+    let today = new Date();
     config.autoClose = false;
+    this.maxDate = this.calendar.getToday();
+    this.todayDate = { year: today.getFullYear(), month: today.getMonth() + 1, day: today.getDate() };
+    for (let d = 1; d < 31; d++) this.days.push(d);
   }
 
   ngOnInit() {
     this.setForms();
     this.getList();
-    this.getTeamNames();
+    this.dropdownLists();
 
     this.searchValue.pipe(debounceTime(500), distinctUntilChanged()).subscribe((event) => this.updateFilter(event));
   }
 
   setForms() {
-    this.playerForm = this.fb.group({
+    this.userForm = this.fb.group({
+      id: ['', [Validators.required]],
+      firstName: ['', [Validators.required]],
+      lastName: ['', [Validators.required]],
+      mobile: ['', [Validators.maxLength(10)]],
+      email: [''],
+      loginName: ['', [Validators.required]],
+      password: ['', [Validators.required]],
+      // gender: ['', [Validators.required]],
+      // dob: ['', [Validators.required]],
+      // profile: [''],
+      status: ['', [Validators.required]],
+      userType: ['', [Validators.required]],
+    });
+
+    this.addContentForm = this.fb.group({
       id: [''],
-      name: ['', [Validators.required]],
-      team: ['', [Validators.required]],
-      role: ['', [Validators.required]],
-      value: ['', [Validators.required, this.isNumberCheck()]],
+      userId: ['', [Validators.required]],
+      userName: ['', [Validators.required]],
+      fileType: ['', [Validators.required]],
+      people: ['', [Validators.required]],
+      location: ['', [Validators.required]],
+      description: ['', [Validators.required]],
     });
   }
 
   nullData() {
     this.selected = null;
+    this.selectedRows = [];
     this.loader = true;
     this.modalLoader = false;
     this.loadingIndicator = true;
-    this.selectedRows = [];
-    this.updatedPlayersStatus = null;
-    this.updatedPlayersTicker = '';
+    this.selectedExitingUsers = [];
 
     this.temp = [];
-    this.players = [];
-    this.players = [];
-    this.totalPlayers = 0;
-
-    if (this.playerRequest) {
-      this.playerRequest.unsubscribe();
-    }
+    this.experts = [];
+    this.totalExperts = 0;
   }
 
   getList(searchKeyword = '') {
     this.nullData();
     const params = {
-      limit: this.playerType ? null : 10,
+      limit: 10,
       skip: this.skipData,
-      searchKeyword: searchKeyword || this.playerType,
-      allPlayers: true,
-      teamName: this.playerType,
+      userType: 'expert',
+      searchKeyword,
     };
-    this.playerRequest = this.apiService
-      .postData(URL_LIST.Players.GetPlayers, params)
-      .pipe(debounceTime(500), distinctUntilChanged())
-      .subscribe(
-        (response) => {
-          this.loader = false;
-          this.loadingIndicator = false;
-          this.setPlayers(response);
-        },
-        (error) => {
-          this.toastService.showError('Please try again!');
-          this.loadingIndicator = false;
-          this.loader = false;
-        },
-      );
+    this.apiService.postData(URL_LIST.Users.GetUsers, params).subscribe(
+      (response) => {
+        this.loader = false;
+        this.loadingIndicator = false;
+        this.setExperts(response);
+      },
+      (error) => {
+        this.toastService.showError('Please try again!');
+        this.loadingIndicator = false;
+        this.loader = false;
+      },
+    );
   }
 
-  setPlayers(response) {
+  setExperts(response) {
     if (response.status) {
-      response.players.map((player) => {
-        player.status = player.status == 1 ? 'Active' : 'Inactive';
+      response.users.map((user) => {
+        user.status = user.status == 1 ? 'Active' : 'Inactive';
       });
-      this.temp = [...response.players];
-      this.players = response.players;
-
-      this.playerType && (this.limitData = response.playersLength);
-      this.totalPlayers = this.hideSnackBar ? this.limitData : response.playersLength;
+      this.temp = [...response.users];
+      this.experts = response.users;
+      this.totalExperts = this.hideSnackBar ? this.limitData : response.usersLength;
     }
   }
 
-  getTeamNames() {
-    this.apiService
-      .getData(URL_LIST.Players.GetTeamNames)
-      .pipe(debounceTime(500), distinctUntilChanged())
-      .subscribe((response) => {
-        this.dropdownList = {
-          teams: response.allTeams,
-          roles: PlayerRoles,
-        };
-      });
-  }
-
-  filterPlayers(playerType) {
-    if (playerType) {
-      this.limitData = null;
-    } else {
-      this.limitData = 10;
-    }
-    this.playerType = playerType;
-    this.getList();
+  dropdownLists() {
+    this.dropdownList = {
+      genders: [
+        { id: 'male', value: 'Male' },
+        { id: 'female', value: 'Female' },
+        { id: 'others', value: 'Others' },
+      ],
+      status: [
+        { id: 1, value: 'Active' },
+        { id: 0, value: 'Inactive' },
+      ],
+      userTypes: [
+        { id: 'user', value: 'User' },
+        { id: 'expert', value: 'Expert' },
+        { id: 'admin', value: 'Admin' },
+      ],
+    };
   }
 
   setPage(pageInfo) {
@@ -230,7 +235,7 @@ export class PlayersComponent implements OnInit {
   }
 
   arrayFromLength(length) {
-    return Array.from({ length: Math.ceil(length / this.limitData || length) });
+    return Array.from({ length: Math.ceil(length / this.limitData) });
   }
 
   toggleExpandRow(row) {
@@ -245,9 +250,7 @@ export class PlayersComponent implements OnInit {
 
   onAction(index, modal, action) {
     this.errorMessage = null;
-    this.updatedPlayersStatus = null;
-    this.updatedPlayersTicker = '';
-    let selected: any = this.players[index] || {};
+    let selected: any = this.experts[index] || {};
     this.selected = {
       action,
       id: selected.id,
@@ -255,14 +258,28 @@ export class PlayersComponent implements OnInit {
       pictures: { profile: selected.profile },
     };
 
-    this.playerForm.reset({
-      ...selected,
-    });
-    this.password = this.selected['password'];
+    if (action === 'addContent') {
+      const content = {
+        userId: selected.id,
+        userName: selected.name,
+      };
+      this.addContentForm.patchValue(content);
+    } else {
+      this.userForm.reset({
+        ...selected,
+      });
+      this.password = this.selected['password'];
+    }
 
     this.modalService.open(modal, {
       centered: action == 'delete' ? true : false,
       size: action == 'delete' ? 'sm' : 'lg',
+    });
+  }
+
+  onExistingOption(modal) {
+    this.modalService.open(modal, {
+      size: 'xl',
     });
   }
 
@@ -318,22 +335,25 @@ export class PlayersComponent implements OnInit {
   }
 
   formSubmit(c) {
-    if (this.validDataForSave(this.playerForm.value) === 'true') {
+    if (this.validDataForSave(this.userForm.value) === 'true') {
       this.modalLoader = true;
       const data = {
-        ...this.playerForm.value,
-        value: this.playerForm.value.value,
+        ...this.userForm.value,
+        loginName: this.f.loginName.value.toLocaleLowerCase(),
+        gender: this.getListValue('gender'),
+        status: parseInt(this.getListValue('status')),
+        userType: this.getListValue('userType'),
+        dob: this.getFormattedDate(this.f.dob.value),
       };
 
       let url = '';
       let apiSubscriber: any;
       if (this.f.id.value) {
-        url = URL_LIST.Players.UpdatePlayer;
-        apiSubscriber = this.apiService.putData(URL_LIST.Players.UpdatePlayer, { data });
+        url = URL_LIST.Users.UpdateUser;
+        apiSubscriber = this.apiService.putData(URL_LIST.Users.UpdateUser, { data });
       } else {
-        delete data.id;
-        url = URL_LIST.Players.CreatePlayer;
-        apiSubscriber = this.apiService.postData(URL_LIST.Players.CreatePlayer, { data });
+        url = URL_LIST.Users.CreateUser;
+        apiSubscriber = this.apiService.postData(URL_LIST.Users.CreateUser, { data });
       }
       apiSubscriber.subscribe(
         (response) => {
@@ -352,35 +372,61 @@ export class PlayersComponent implements OnInit {
         ids: this.selected.id,
       },
     };
-    this.apiService.putData(URL_LIST.Players.DeletePlayers, data).subscribe(
+    this.apiService.putData(URL_LIST.Users.DeleteUsers, data).subscribe(
       (response) => response.status && (this.getList(), c()),
       (error) => error,
     );
+  }
+
+  approveMedia(userId, status, modal) {
+    this.approveUserData = {
+      userId,
+      status,
+    };
+    this.modalService.open(modal, {
+      centered: true,
+      size: 'sm',
+    });
   }
 
   onApprove(c) {
     const data = {
       data: {
-        ids: [...this.selectedRows.map((selectedRow) => selectedRow.id)],
-        isEnable: this.updatedPlayersStatus === 'true',
+        ids: [this.approveUserData.userId],
+        status: this.approveUserData.status,
       },
     };
-    this.apiService.putData(URL_LIST.Players.UpdatePlayersStatus, data).subscribe(
+    this.apiService.putData(URL_LIST.Users.ApproveUsers, data).subscribe(
       (response) => response.status && (this.getList(), c()),
       (error) => error,
     );
   }
 
-  onUpdateTicker(c) {
+  userTypeMedia(userId, userType, modal) {
+    this.userTypeData = {
+      userId,
+      userType,
+    };
+    this.modalService.open(modal, {
+      centered: true,
+      size: 'sm',
+    });
+  }
+
+  onChangeUserType(c, ids = [this.userTypeData.userId]) {
     const data = {
       data: {
-        ids: [...this.selectedRows.map((selectedRow) => selectedRow.id)],
-        growth: this.updatedPlayersTicker,
+        ids: [...ids],
+        userType: (this.userTypeData || {}).userType || 'expert',
       },
     };
-    this.apiService.putData(URL_LIST.Players.UpdatePlayersTicker, data).subscribe(
+    this.apiService.putData(URL_LIST.Users.ToggleExpertUsers, data).subscribe(
       (response) => response.status && (this.getList(), c()),
       (error) => error,
     );
+  }
+
+  handleSelectedUserType(c) {
+    this.onChangeUserType(c, [...this.selectedExitingUsers.map((user) => user.id)]);
   }
 }

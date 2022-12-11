@@ -5,4 +5,7 @@ export class Player extends BaseEntity {
   team: string;
   role: string;
   value: number;
+  isDeleted: boolean;
+  isEnable: boolean;
+  growth: string;
 }

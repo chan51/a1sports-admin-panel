@@ -12,6 +12,7 @@ export const URL_LIST = {
     DeleteUsers: 'api/v1/delete-users',
     ApproveUsers: 'api/v1/approve-user',
     GetUserFiles: 'api/v1/get-user-files',
+    ToggleExpertUsers: 'api/v1/toggle-expert-user',
   },
 
   Players: {
@@ -20,6 +21,8 @@ export const URL_LIST = {
     UpdatePlayer: 'api/v1/update-player',
     DeletePlayers: 'api/v1/delete-players',
     UpdatePlayersStatus: 'api/v1/update-players-status',
+    UpdatePlayersTicker: 'api/v1/update-players-ticker',
+    GetTeamNames: 'api/v1/get-team-names',
   },
 
   FAQs: {
@@ -39,12 +42,10 @@ export const URL_LIST = {
     UpdateFeedStatus: 'api/v1/update-feed-status',
   },
 
-  Events: {
-    GetRules: 'api/v1/get-event-rules',
-    GetEvents: 'api/v1/get-events',
-    UploadEventBanner: 'api/v1/upload-event-banner',
-    CreateEvent: 'api/v1/create-event',
-    UpdateEvent: 'api/v1/update-event',
-    DeleteEvents: 'api/v1/delete-events',
+  Schedules: {
+    GetSchedules: 'api/v1/get-schedules',
+    CreateSchedule: 'api/v1/create-schedule',
+    UpdateSchedule: 'api/v1/update-schedule',
+    DeleteSchedules: 'api/v1/delete-schedules',
   },
 };

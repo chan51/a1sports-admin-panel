@@ -476,3 +476,9 @@ button:focus {
   border: none;
   color: #3185fc;
 }
+
+.other-option {
+  .dropdown-toggle::after {
+    display: none;
+  }
+}

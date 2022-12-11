@@ -7,7 +7,7 @@
 </div>
 
 <div [@routerTransition]>
-  <app-page-header *ngIf="!hideSnackBar" [heading]="'All Players'" [icon]="'fa-user'"></app-page-header>
+  <app-page-header *ngIf="!hideSnackBar" [heading]="'All Tickers'" [icon]="'fa-user'"></app-page-header>
   <div class="row">
     <div class="col col-xl-12 col-lg-12">
       <div class="filters">
@@ -18,8 +18,8 @@
           (input)="searchValue.next($event)"
         />
         <select class="filter-box" name="userType" (change)="filterPlayers($event.target.value)">
-          <option value="" [selected]="playerType === ''">All</option>
-          <option *ngFor="let team of dropdownList.teams" [value]="team.id" [selected]="playerType === team.id">
+          <option value="" [selected]="teamName === ''">All</option>
+          <option *ngFor="let team of dropdownList.teams" [value]="team.id" [selected]="teamName === team.id">
             {{ team.name }}
           </option>
         </select>
@@ -43,7 +43,7 @@
         <div *ngIf="!showAll" class="refreshIcon btn" (click)="getList()" placement="top" ngbTooltip="Refresh">
           Refresh
         </div>
-        <a *ngIf="showAll" routerLink="/players" class="user btn">All Players </a>
+        <a *ngIf="showAll" routerLink="/ticker" class="user btn">All Tickers </a>
         <div class="addIcon">
           <a class="btn" (click)="onAction(-1, playerModal, 'add')">
             Add Player <i class="fa fa-plus-circle" aria-hidden="true"></i>
@@ -53,7 +53,7 @@
 
       <div class="customTable">
         <ngx-datatable
-          [rows]="players"
+          [rows]="tickers"
           [columns]="columns"
           [columnMode]="'force'"
           #table
@@ -65,7 +65,7 @@
           [limit]="limitData"
           [externalPaging]="true"
           [externalSorting]="true"
-          [count]="totalPlayers"
+          [count]="totalTickers"
           [offset]="pageNumber"
           (sort)="onSort($event)"
           (page)="setPage($event)"
@@ -87,7 +87,7 @@
                   </div>
                 </div>
 
-                <div class="col col-xl-4 col-md-4 col-lg-4" *ngIf="selectedRow.playerType">
+                <div class="col col-xl-4 col-md-4 col-lg-4" *ngIf="selectedRow.teamName">
                   <div>
                     <div><strong>Team</strong></div>
                     <div>{{ selectedRow.team.toUpperCase() }}</div>
@@ -195,10 +195,10 @@
               let-offset="offset"
             >
               <div class="footer" style="padding: 5px 10px; width: 100%">
-                <div>{{ selectedRows?.length }} selected / {{ totalPlayers }} total</div>
+                <div>{{ selectedRows?.length }} selected / {{ totalTickers }} total</div>
                 <div>
                   <a
-                    *ngFor="let data of arrayFromLength(totalPlayers); let idx = index"
+                    *ngFor="let data of arrayFromLength(totalTickers); let idx = index"
                     (click)="setPage({ offset: idx })"
                   >
                     {{ idx }}

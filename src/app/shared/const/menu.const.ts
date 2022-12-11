@@ -10,20 +10,25 @@ export const Menu = [
     icon: 'fa-user',
   },
   {
+    title: 'Experts',
+    link: '/experts',
+    icon: 'fa-user-md',
+  },
+  {
     title: 'Players',
     link: '/players',
-    icon: 'fa-user',
+    icon: 'fa-users',
   },
-  // {
-  //   title: 'Events',
-  //   link: '/events',
-  //   icon: 'fa-book',
-  // },
-  // {
-  //   title: 'Chat Archive',
-  //   link: '/archive',
-  //   icon: 'fa-archive',
-  // },
+  {
+    title: 'Ticker',
+    link: '/ticker',
+    icon: 'fa-check',
+  },
+  {
+    title: 'Schedules',
+    link: '/schedules',
+    icon: 'fa-calendar',
+  },
   {
     title: 'FAQs',
     link: '/faqs',

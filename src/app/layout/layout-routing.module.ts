@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
+import * as com from './';
 import { LayoutComponent } from './layout.component';
-import { DashboardComponent, ArchiveComponent, EventsComponent, FAQsComponent, UsersComponent, PlayersComponent } from './';
 
 const routes: Routes = [
   {
@@ -10,12 +10,14 @@ const routes: Routes = [
     component: LayoutComponent,
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'users', component: UsersComponent },
-      { path: 'events', component: EventsComponent },
-      { path: 'faqs', component: FAQsComponent },
-      { path: 'archive', component: ArchiveComponent },
-      {path: 'players', component: PlayersComponent}
+      { path: 'dashboard', component: com.DashboardComponent },
+      { path: 'users', component: com.UsersComponent },
+      { path: 'experts', component: com.ExpertsComponent },
+      { path: 'faqs', component: com.FAQsComponent },
+      { path: 'archive', component: com.ArchiveComponent },
+      { path: 'players', component: com.PlayersComponent },
+      { path: 'ticker', component: com.TickerComponent },
+      { path: 'schedules', component: com.SchedulesComponent },
     ],
   },
 ];

@@ -1,17 +1,21 @@
 import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, Input, ViewChild, Output, EventEmitter } from '@angular/core';
+
+import { Subject } from 'rxjs';
+import * as moment from 'moment';
+import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { DatatableComponent } from '@swimlane/ngx-datatable';
-import { Component, OnInit, Input, ViewChild } from '@angular/core';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { NgbModal, NgbDropdownConfig, NgbCalendar, NgbDate } from '@ng-bootstrap/ng-bootstrap';
 
-import * as moment from 'moment';
-import { routerTransition } from '../../router.animations';
-import { APIService } from '../../shared/services/api.service';
-import { URL_LIST } from '@app/shared/const/api-urls.const';
 import { ToastService } from '@app/shared';
-import { Selection } from '@app/shared/models/selection';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { User } from '@app/shared/models/user';
-import { IDropdownSettings } from 'ng-multiselect-dropdown';
+import { Selection } from '@app/shared/models/selection';
+import { URL_LIST } from '@app/shared/const/api-urls.const';
+
+import { routerTransition } from '@app/router.animations';
+import { APIService } from '@app/shared/services/api.service';
 
 @Component({
   selector: 'app-users',
@@ -55,18 +59,22 @@ export class UsersComponent implements OnInit {
   columns = [{ name: 'Name' }, { name: 'Login Name' }, { name: 'User Type' }, { name: 'Status' }, { prop: 'Action' }];
   loadingIndicator: boolean = true;
   @ViewChild('table') table: DatatableComponent;
+  userTypeData;
 
   days = [];
   todayDate;
   loader = false;
   modalLoader = false;
-  @Input() showAll;
-  @Input() hideSnackBar;
   errorMessage: string;
   imagePath = this.apiService.baseURL;
+  @Input() showAll;
+  @Input() hideSnackBar;
+  @Input() fromExpert;
+  @Output() selctedUsersEvent: EventEmitter<any> = new EventEmitter<any>();
 
   userForm: FormGroup;
   addContentForm: FormGroup;
+  searchValue: Subject<any> = new Subject<any>();
 
   get f() {
     return this.userForm.controls;
@@ -96,6 +104,8 @@ export class UsersComponent implements OnInit {
     this.setForms();
     this.getList();
     this.dropdownLists();
+
+    this.searchValue.pipe(debounceTime(500), distinctUntilChanged()).subscribe((event) => this.updateFilter(event));
   }
 
   setForms() {
@@ -127,6 +137,7 @@ export class UsersComponent implements OnInit {
 
   nullData() {
     this.selected = null;
+    this.selectedRows = [];
     this.loader = true;
     this.modalLoader = false;
     this.loadingIndicator = true;
@@ -144,6 +155,9 @@ export class UsersComponent implements OnInit {
       userType: this.userType,
       searchKeyword,
     };
+    if (this.fromExpert) {
+      params.userType = 'user';
+    }
     this.apiService.postData(URL_LIST.Users.GetUsers, params).subscribe(
       (response) => {
         this.loader = false;
@@ -182,6 +196,7 @@ export class UsersComponent implements OnInit {
       ],
       userTypes: [
         { id: 'user', value: 'User' },
+        { id: 'expert', value: 'Expert' },
         { id: 'admin', value: 'Admin' },
       ],
     };
@@ -215,14 +230,14 @@ export class UsersComponent implements OnInit {
   }
 
   updateFilter(event) {
-    const val = event.target.value.toLowerCase();
-    this.getList(val);
+    this.getList(event.target.value.toLowerCase());
   }
 
   onSelect({ selected }) {
     selected = selected.filter((row) => !row.isSuperAdmin);
     this.selectedRows.splice(0, this.selectedRows.length);
     this.selectedRows.push(...selected);
+    this.selctedUsersEvent.next([...selected]);
   }
 
   shouldCheck(row) {
@@ -386,6 +401,33 @@ export class UsersComponent implements OnInit {
       },
     };
     this.apiService.putData(URL_LIST.Users.ApproveUsers, data).subscribe(
+      (response) => response.status && (this.getList(), c()),
+      (error) => error,
+    );
+  }
+
+  userTypeMedia(userId, userType, modal) {
+    this.userTypeData = {
+      userId,
+      userType,
+    };
+    this.modalService.open(modal, {
+      centered: true,
+      size: 'sm',
+    });
+  }
+
+  onChangeUserType(c) {
+    const data = {
+      data: {
+        ids:
+          typeof this.userTypeData.userId === 'string'
+            ? [this.userTypeData.userId]
+            : [...this.userTypeData.userId.map((user) => user.id)],
+        userType: this.userTypeData.userType,
+      },
+    };
+    this.apiService.putData(URL_LIST.Users.ToggleExpertUsers, data).subscribe(
       (response) => response.status && (this.getList(), c()),
       (error) => error,
     );

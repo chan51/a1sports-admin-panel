@@ -17,22 +17,22 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { of, Subject } from 'rxjs';
 
 @Component({
-  selector: 'app-players',
-  templateUrl: './players.component.html',
-  styleUrls: ['./players.component.scss'],
+  selector: 'app-ticker',
+  templateUrl: './ticker.component.html',
+  styleUrls: ['./ticker.component.scss'],
   animations: [routerTransition()],
 })
-export class PlayersComponent implements OnInit {
+export class TickerComponent implements OnInit {
   temp = [];
-  players: Player[] = [];
+  tickers: Player[] = [];
   skipData = 0;
   limitData = 10;
-  totalPlayers = 0;
+  totalTickers = 0;
   allTeams = [];
   pageNumber = 0;
-  playerType: any = '';
+  teamName: any = '';
   userId = this.apiService.userId;
-  playerRequest = null;
+  tickerRequest = null;
 
   dropdownList = {
     roles: [],
@@ -123,25 +123,25 @@ export class PlayersComponent implements OnInit {
     this.updatedPlayersTicker = '';
 
     this.temp = [];
-    this.players = [];
-    this.players = [];
-    this.totalPlayers = 0;
+    this.tickers = [];
+    this.totalTickers = 0;
 
-    if (this.playerRequest) {
-      this.playerRequest.unsubscribe();
+    if (this.tickerRequest) {
+      this.tickerRequest.unsubscribe();
     }
   }
 
   getList(searchKeyword = '') {
     this.nullData();
     const params = {
-      limit: this.playerType ? null : 10,
+      limit: this.teamName ? null : 10,
       skip: this.skipData,
-      searchKeyword: searchKeyword || this.playerType,
+      searchKeyword: searchKeyword || this.teamName,
       allPlayers: true,
-      teamName: this.playerType,
+      teamName: this.teamName,
+      growth: this.teamName ? false : true,
     };
-    this.playerRequest = this.apiService
+    this.tickerRequest = this.apiService
       .postData(URL_LIST.Players.GetPlayers, params)
       .pipe(debounceTime(500), distinctUntilChanged())
       .subscribe(
@@ -164,10 +164,11 @@ export class PlayersComponent implements OnInit {
         player.status = player.status == 1 ? 'Active' : 'Inactive';
       });
       this.temp = [...response.players];
-      this.players = response.players;
+      this.tickers = response.players;
+      this.selectedRows = [...this.tickers.filter((player) => player.growth)];
 
-      this.playerType && (this.limitData = response.playersLength);
-      this.totalPlayers = this.hideSnackBar ? this.limitData : response.playersLength;
+      this.teamName && (this.limitData = response.playersLength);
+      this.totalTickers = this.hideSnackBar ? this.limitData : response.playersLength;
     }
   }
 
@@ -183,13 +184,13 @@ export class PlayersComponent implements OnInit {
       });
   }
 
-  filterPlayers(playerType) {
-    if (playerType) {
+  filterPlayers(teamName) {
+    if (teamName) {
       this.limitData = null;
     } else {
       this.limitData = 10;
     }
-    this.playerType = playerType;
+    this.teamName = teamName;
     this.getList();
   }
 
@@ -247,7 +248,7 @@ export class PlayersComponent implements OnInit {
     this.errorMessage = null;
     this.updatedPlayersStatus = null;
     this.updatedPlayersTicker = '';
-    let selected: any = this.players[index] || {};
+    let selected: any = this.tickers[index] || {};
     this.selected = {
       action,
       id: selected.id,

@@ -7,57 +7,39 @@
 </div>
 
 <div [@routerTransition]>
-  <app-page-header *ngIf="!hideSnackBar" [heading]="'All Users'" [icon]="'fa-user'"></app-page-header>
+  <app-page-header *ngIf="!hideSnackBar" [heading]="'All Experts'" [icon]="'fa-user-md'"></app-page-header>
   <div class="row">
     <div class="col col-xl-12 col-lg-12">
       <div class="filters">
         <input
           type="text"
           class="search-box"
-          placeholder="Type to filter users..."
+          placeholder="Type to filter experts..."
           (input)="searchValue.next($event)"
         />
-        <select *ngIf="!fromExpert" class="filter-box" name="userType" (change)="filterUsers($event.target.value)">
-          <option value="">All</option>
-          <option value="user">User</option>
-          <option value="expert">Expert</option>
-          <option value="admin">Admin</option>
-        </select>
-        <div *ngIf="!fromExpert" class="overflow-hidden other-option">
-          <div ngbDropdown container="body" autoClose="true">
-            <button
-              type="button"
-              class="btn btn-outline-primary btn-sm"
-              ngbDropdownToggle
-              [disabled]="!selectedRows.length"
-            >
-              <i class="fa fa-ellipsis-v"></i>
-            </button>
-            <div ngbDropdownMenu *ngIf="selectedRows.length">
-              <button ngbDropdownItem (click)="userTypeMedia(selectedRows, 'expert', userTypeModal)">
-                Make Expert
-              </button>
-              <button ngbDropdownItem (click)="userTypeMedia(selectedRows, 'user', userTypeModal)">
-                Remove Expert
-              </button>
-            </div>
-          </div>
-        </div>
 
         <div *ngIf="!showAll" class="refreshIcon btn" (click)="getList()" placement="top" ngbTooltip="Refresh">
           Refresh
         </div>
-        <a *ngIf="showAll" routerLink="/users" class="user btn">All Users </a>
-        <div *ngIf="!fromExpert" class="addIcon">
-          <a class="btn" (click)="onAction(-1, userModal, 'add')">
-            Add User <i class="fa fa-plus-circle" aria-hidden="true"></i>
-          </a>
+        <a *ngIf="showAll" routerLink="/experts" class="user btn">All Experts </a>
+        <div class="addIcon">
+          <div class="overflow-hidden other-option">
+            <div ngbDropdown container="body" autoClose="true">
+              <button type="button" class="btn btn-outline-primary btn-sm" ngbDropdownToggle>
+                Add User <i class="fa fa-plus-circle" aria-hidden="true"></i>
+              </button>
+              <div ngbDropdownMenu>
+                <button ngbDropdownItem (click)="onAction(-1, userModal, 'add')">New User</button>
+                <button ngbDropdownItem (click)="onExistingOption(userListModal)">Existing User</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="customTable">
         <ngx-datatable
-          [rows]="users"
+          [rows]="experts"
           [columns]="columns"
           [columnMode]="'force'"
           #table
@@ -69,7 +51,7 @@
           [limit]="limitData"
           [externalPaging]="true"
           [externalSorting]="true"
-          [count]="totalUsers"
+          [count]="totalExperts"
           [offset]="pageNumber"
           (sort)="onSort($event)"
           (page)="setPage($event)"
@@ -170,10 +152,8 @@
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="Coins">
-            <ng-template let-value="value" let-row="row" ngx-datatable-cell-template>
-              <strong>
-                {{ value }} ({{ row.investment.investment }} sold, {{ row.investment.soldInvestment }} hold)
-              </strong>
+            <ng-template let-value="value" ngx-datatable-cell-template>
+              <strong>{{ value }}</strong>
             </ng-template>
           </ngx-datatable-column>
           <ngx-datatable-column name="User Type" [width]="40">
@@ -181,12 +161,7 @@
               <strong class="capitalize">{{ row.userType }}</strong>
             </ng-template>
           </ngx-datatable-column>
-          <ngx-datatable-column name="Last Login" [width]="40">
-            <ng-template let-row="row" ngx-datatable-cell-template>
-              {{ row.loggedInAt | date : 'dd/MM/yyyy' : 'UTC' }}
-            </ng-template>
-          </ngx-datatable-column>
-          <ngx-datatable-column *ngIf="!fromExpert" name="Action" [width]="350" [canAutoResize]="false">
+          <ngx-datatable-column name="Action" [width]="350" [canAutoResize]="false">
             <ng-template let-row="row" let-value="value" ngx-datatable-cell-template let-rowIndex="rowIndex">
               <div class="overflow-hidden">
                 <div ngbDropdown container="body" autoClose="true">
@@ -209,18 +184,7 @@
                     >
                       Disable
                     </button>
-                    <button
-                      *ngIf="row?.userType === 'user'"
-                      ngbDropdownItem
-                      (click)="userTypeMedia(row?.id, 'expert', userTypeModal)"
-                    >
-                      Make Expert
-                    </button>
-                    <button
-                      *ngIf="row?.userType === 'expert'"
-                      ngbDropdownItem
-                      (click)="userTypeMedia(row?.id, 'user', userTypeModal)"
-                    >
+                    <button ngbDropdownItem (click)="userTypeMedia(row?.id, 'user', userTypeModal)">
                       Remove Expert
                     </button>
                   </div>
@@ -239,10 +203,10 @@
               let-offset="offset"
             >
               <div class="footer" style="padding: 5px 10px; width: 100%">
-                <div>{{ selectedRows?.length }} selected / {{ totalUsers }} total</div>
+                <div>{{ selectedRows?.length }} selected / {{ totalExperts }} total</div>
                 <div>
                   <a
-                    *ngFor="let data of arrayFromLength(totalUsers); let idx = index"
+                    *ngFor="let data of arrayFromLength(totalExperts); let idx = index"
                     (click)="setPage({ offset: idx })"
                   >
                     {{ idx }}
@@ -576,5 +540,21 @@
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="c()">Cancel</button>
     <button type="button" class="btn btn-primary" (click)="onChangeUserType(c)">Update</button>
+  </div>
+</ng-template>
+
+<ng-template #userListModal let-c="close" let-d="dismiss" backdrop="false">
+  <div class="modal-header">
+    <h5 class="modal-title">User list</h5>
+    <button type="button" class="close" aria-label="Close" (click)="d()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <app-users [hideSnackBar]="true" [fromExpert]="true" (selctedUsersEvent)="selectedExitingUsers = $event"></app-users>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="c()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="handleSelectedUserType(c)">Update</button>
   </div>
 </ng-template>
